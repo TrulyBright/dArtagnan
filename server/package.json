@@ -1,6 +1,10 @@
 {
 	"name": "@dartagnan/server",
 	"private": true,
+	"scripts": {
+		"dev": "tsc --watch",
+		"build": "tsc"
+	},
 	"dependencies": {
 		"ws": "^8.18.0",
 		"@dartagnan/api": "workspace:*"
