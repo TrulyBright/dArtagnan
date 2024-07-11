@@ -8,6 +8,7 @@ type ActorByAction<A extends Action> = A extends UserAction ? User : Player
 
 type Cmd<A extends Action> = {
     exec(a: ActorByAction<A>): void
+    readonly isUserCmd: A extends UserAction ? true : false
 } & A
 
 class CSpeak implements Cmd<Speak> {
@@ -15,6 +16,7 @@ class CSpeak implements Cmd<Speak> {
     constructor(readonly message: string) {
         this.message = this.message.slice(80).trim()
     }
+    readonly isUserCmd = true
     exec(a: User): void {
         if (!this.message) return
         a.room?.broadcast(new UserSpoke(this.message, a))
@@ -22,6 +24,7 @@ class CSpeak implements Cmd<Speak> {
 }
 
 class CStartGame implements Cmd<StartGame> {
+    readonly isUserCmd = true
     readonly tag = 'StartGame'
     exec(a: User): void {
         if (a.room?.host !== a) return
@@ -34,17 +37,20 @@ class CStartGame implements Cmd<StartGame> {
 class CShoot implements Cmd<Shoot> {
     readonly tag = 'Shoot'
     constructor(readonly index: number) {}
+    readonly isUserCmd = false
     exec(a: Player): void {
     }
 }
 
 class CDrawCard implements Cmd<DrawCard> {
+    readonly isUserCmd = false
     readonly tag = 'DrawCard'
     exec(a: Player): void {
     }
 }
 
 class CPlayCard implements Cmd<PlayCard> {
+    readonly isUserCmd = false
     readonly tag = "PlayCard"
     exec(a: Player): void {
     }
@@ -53,6 +59,7 @@ class CPlayCard implements Cmd<PlayCard> {
 class CSetDrift implements Cmd<SetDrift> {
     readonly tag = 'SetDrift'
     constructor(readonly drift: Drift) {}
+    readonly isUserCmd = false
     exec(a: Player): void {
     }
 }
@@ -67,7 +74,3 @@ export const dispatch = <T extends Action>(a: T) => {
         case 'SetDrift': return new CSetDrift(a.drift)
     }
 }
-
-export const isUserCommand = (a: Cmd<Action>): a is Cmd<UserAction> => (
-    a.tag === 'Speak' || a.tag === 'StartGame'
-)

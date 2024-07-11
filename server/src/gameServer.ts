@@ -1,5 +1,5 @@
 import { WebSocketServer } from "ws"
-import { dispatch, isUserCommand } from "./action"
+import { dispatch } from "./action"
 import { User } from "./user"
 import { isUsername } from "@api/user"
 import { isCode } from "@api/code"
@@ -23,7 +23,7 @@ export class GameServer {
             .on('message', (data) => {
                 const parsed: Action = JSON.parse(data.toString())
                 const cmd = dispatch(parsed)
-                if (isUserCommand(cmd)) cmd.exec(user)
+                if (cmd.isUserCmd) cmd.exec(user)
                 else if (user.player) cmd.exec(user.player)
             })
             .once('close', () => {
