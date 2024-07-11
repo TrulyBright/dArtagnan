@@ -2,15 +2,17 @@
 	"name": "@dartagnan/server",
 	"private": true,
 	"scripts": {
-		"dev": "tsc --watch",
-		"build": "tsc"
+		"dev": "npx swc --watch",
+		"build": "npx swc ./src -d ./dist"
 	},
 	"dependencies": {
 		"ws": "^8.18.0",
 		"@dartagnan/api": "workspace:*"
 	},
 	"devDependencies": {
-		"typescript": "latest",
+		"@swc/cli": "latest",
+		"@swc/core": "latest",
+		"chokidar": "latest",
 		"@types/ws": "^8.5.10"
 	},
 	"imports": {

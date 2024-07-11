@@ -3,8 +3,8 @@
     "name": "@dartagnan/api",
     "private": true,
     "scripts": {
-        "dev": "tsc --watch",
-        "build": "tsc"
+        "dev": "npx swc ./src --watch",
+        "build": "npx swc ./src -d ./dist"
     },
     "imports": {
 		"#*": "./src/*.ts"
@@ -21,6 +21,8 @@
         "./user": "./src/user.ts"
     },
     "devDependencies": {
-        "typescript": "latest"
+        "@swc/cli": "latest",
+		"@swc/core": "latest",
+        "chokidar": "latest"
     }
 }
