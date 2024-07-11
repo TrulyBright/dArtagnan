@@ -1,8 +1,8 @@
-import { RoomBase } from "@api/room"
-import { Code } from "@api/code"
-import { Event } from "@api/event"
-import { User } from "./user"
-import { Game } from "./game"
+import { RoomBase } from "@dartagnan/api/room"
+import { Code } from "@dartagnan/api/code"
+import { Event } from "@dartagnan/api/event"
+import { User } from "#user"
+import { Game } from "#game"
 
 export class Room implements RoomBase {
     readonly users: User[] = []

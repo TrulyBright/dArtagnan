@@ -1,3 +1,23 @@
 {
-    "type": "module"
+    "type": "module",
+    "name": "@dartagnan/api",
+    "private": true,
+    "scripts": {
+        "dev": "tsc --watch",
+        "build": "tsc"
+    },
+    "exports": {
+        "./action": "./src/action.ts",
+        "./code": "./src/code.ts",
+        "./drift": "./src/drift.ts",
+        "./error": "./src/error.ts",
+        "./event": "./src/event.ts",
+        "./game": "./src/game.ts",
+        "./player": "./src/player.ts",
+        "./room": "./src/room.ts",
+        "./user": "./src/user.ts"
+    },
+    "devDependencies": {
+        "typescript": "latest"
+    }
 }

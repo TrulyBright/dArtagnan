@@ -1,8 +1,8 @@
-import { UserSpoke } from "@api/event"
-import { Player } from "./player"
-import { User } from "./user"
-import { Action, DrawCard, PlayCard, Shoot, Speak, StartGame, SetDrift, UserAction, PlayerAction } from "@api/action"
-import { Drift } from "@api/drift"
+import { UserSpoke } from "@dartagnan/api/event"
+import { Player } from "#player"
+import { User } from "#user"
+import { Action, DrawCard, PlayCard, Shoot, Speak, StartGame, SetDrift, UserAction } from "@dartagnan/api/action"
+import { Drift } from "@dartagnan/api/drift"
 
 type ActorByAction<A extends Action> = A extends UserAction ? User : Player
 

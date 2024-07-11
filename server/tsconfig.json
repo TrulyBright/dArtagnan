@@ -1,9 +1,10 @@
 {
     "extends": "../tsconfig.root.json",
     "compilerOptions": {
-        "paths": {
-            "@api/*": ["../api/src/*"],
-            "@src/*": ["./src/*"]
-        }
-    }
+        "module": "ESNext",
+        "moduleResolution": "Bundler",
+        "outDir": "dist",
+        "rootDir": "src",
+    },
+    "include": ["src"],
 }

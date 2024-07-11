@@ -1,10 +1,9 @@
-import { GameBase } from "@api/game"
-import { Player } from "./player"
+import { Player } from "#player"
+import { GameBase } from "@dartagnan/api/game"
 
 export class Game implements GameBase {
-    readonly players: Player[] = []
     static readonly MIN_PLAYERS = 3
-    private turn: Player | null = null
+    readonly players: Player[] = []
     addPlayer(p: Player) {
         this.players.push(p)
     }

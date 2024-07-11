@@ -1,8 +1,8 @@
-import { UserBase, Username } from "@api/user"
-import { Room } from "./room"
-import { Event } from "@api/event"
-import { Listening } from "./listening"
-import { Player } from "./player"
+import { UserBase, Username } from "@dartagnan/api/user"
+import { Room } from "#room"
+import { Event } from "@dartagnan/api/event"
+import { Listening } from "#listening"
+import { Player } from "#player"
 
 export class User extends Listening<Event> implements UserBase {
     private static nextId = 0

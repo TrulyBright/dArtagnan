@@ -1,6 +1,15 @@
 {
+	"name": "@dartagnan/server",
+	"private": true,
 	"dependencies": {
 		"ws": "^8.18.0",
+		"@dartagnan/api": "workspace:*"
+	},
+	"devDependencies": {
+		"typescript": "latest",
 		"@types/ws": "^8.5.10"
+	},
+	"imports": {
+		"#*": "./src/*.ts"
 	}
 }

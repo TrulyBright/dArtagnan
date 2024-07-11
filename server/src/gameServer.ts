@@ -1,10 +1,10 @@
 import { WebSocketServer } from "ws"
-import { dispatch } from "./action"
-import { User } from "./user"
-import { isUsername } from "@api/user"
-import { isCode } from "@api/code"
-import { Hub } from "./hub"
-import { Action } from "@api/action"
+import { dispatch } from "#action"
+import { User } from "#user"
+import { isUsername } from "@dartagnan/api/user"
+import { isCode } from "@dartagnan/api/code"
+import { Hub } from "#hub"
+import { Action } from "@dartagnan/api/action"
 
 export class GameServer {
     readonly connectedWss = new Set<WebSocketServer>()

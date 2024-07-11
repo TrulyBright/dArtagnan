@@ -1,6 +1,6 @@
-import { PlayerBase } from "@api/player"
-import { Game } from "./game"
-import { Listening } from "./listening"
+import { PlayerBase } from "@dartagnan/api/player"
+import { Game } from "#game"
+import { Listening } from "#listening"
 
 export class Player extends Listening<Event> implements PlayerBase {
     game: Game | null = null
