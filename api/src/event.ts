@@ -1,5 +1,5 @@
-import { PlayerBase } from "./player"
-import { UserBase } from "./user"
+import { PlayerBase } from "#player"
+import { UserBase } from "#user"
 
 export class UserSpoke {
     constructor(

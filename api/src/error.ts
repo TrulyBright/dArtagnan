@@ -1,4 +1,4 @@
-import { Code } from "./code"
+import { Code } from "#code"
 
 export class NoSuchRoom extends Error {
     constructor(readonly code: Code) {

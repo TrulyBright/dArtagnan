@@ -1,4 +1,4 @@
-import { Drift } from "./drift"
+import { Drift } from "#drift"
 
 export type Speak = {
     readonly tag: 'Speak'

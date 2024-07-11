@@ -6,6 +6,9 @@
         "dev": "tsc --watch",
         "build": "tsc"
     },
+    "imports": {
+		"#*": "./src/*.ts"
+    },
     "exports": {
         "./action": "./src/action.ts",
         "./code": "./src/code.ts",
