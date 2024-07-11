@@ -3,7 +3,9 @@
 	"private": true,
 	"scripts": {
 		"dev": "npx swc --watch",
-		"build": "npx swc ./src -d ./dist"
+		"build": "npx swc ./src -d ./dist",
+		"clean": "rm -rf dist",
+		"check-types": "tsc"
 	},
 	"dependencies": {
 		"ws": "^8.18.0",
@@ -12,7 +14,9 @@
 	"devDependencies": {
 		"@swc/cli": "latest",
 		"@swc/core": "latest",
+		"@swc/jest": "latest",
 		"chokidar": "latest",
+		"typescript": "latest",
 		"@types/ws": "^8.5.10"
 	},
 	"imports": {
