@@ -10,6 +10,7 @@ type Props<S = State> =
     never
 
 type Switching<S extends State> = { switchTo(s: S): GameIn<S> }
+interface Guardable { in<S extends State>(s: S): this is GameIn<S> }
 
 type IdleProps = {
     addPlayer(p: Player): void
@@ -34,13 +35,9 @@ type RoundCeremonyProps = {
 
 type GameOverProps = {
     readonly winner: Player
-} // No switch
+}
 
-export type GameIn<S extends State> = GameBase<S> & Props<S>
-// @ts-expect-error
-export const isGameIn = <S extends State>(g: Player['game'], s: S): g is GameIn<S> => (
-    g?.state === s
-)
+export type GameIn<S extends State> = GameBase<S> & Props<S> & Guardable
 
 export class GameIdle implements GameIn<'Idle'> {
     state: 'Idle' = 'Idle'
@@ -58,6 +55,9 @@ export class GameIdle implements GameIn<'Idle'> {
         if (i === -1) return
         this.players.splice(i, 1)
         p.leave()
+    }
+    in<S extends State>(s: S): this is GameIn<S> {
+        return this.state === s
     }
 }
 
@@ -81,6 +81,9 @@ class GameBetSetup implements GameIn<'BetSetup'> {
     get betWindow(): readonly [number, number] {
         return [5 * this.round, 5 * this.round + 10]
     }
+    in<S extends State>(s: S): this is GameIn<S> {
+        return this.state === s
+    }
 }
 
 class GameRoundCeremony implements GameIn<'RoundCeremony'> {
@@ -96,6 +99,9 @@ class GameRoundCeremony implements GameIn<'RoundCeremony'> {
     switchTo(s: 'BetSetup' | 'GameOver') {
         if (s === 'BetSetup') return new GameBetSetup(this)
         return new GameOver(this)
+    }
+    in<S extends State>(s: S): this is GameIn<S> {
+        return this.state === s
     }
 }
 
@@ -115,6 +121,9 @@ class GameTurn implements GameIn<'Turn'> {
         if (s === 'Turn') return new GameTurn(this)
         return new GameRoundCeremony(this)
     }
+    in<S extends State>(s: S): this is GameIn<S> {
+        return this.state === s
+    }
 }
 
 class GameOver implements GameIn<'GameOver'> {
@@ -124,5 +133,8 @@ class GameOver implements GameIn<'GameOver'> {
     constructor(g: GameRoundCeremony) {
         this.winner = g.winner
         this.players = g.players
+    }
+    in<S extends State>(s: S): this is GameIn<S> {
+        return this.state === s
     }
 }

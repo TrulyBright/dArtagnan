@@ -3,7 +3,7 @@ import { Player } from "#player"
 import { User } from "#user"
 import { Action, DrawCard, PlayCard, Shoot, Speak, StartGame, SetDrift, UserAction } from "@dartagnan/api/action"
 import { Drift } from "@dartagnan/api/drift"
-import { GameIdle, isGameIn } from "#game"
+import { GameIdle } from "#game"
 
 type ActorByAction<A extends Action> = A extends UserAction ? User : Player
 
@@ -47,8 +47,9 @@ class CShoot implements Cmd<Shoot> {
     constructor(readonly index: number) {}
     readonly isUserCmd = false
     exec(a: Player): void {
-        if (!isGameIn(a.game, 'Turn')) return
+        if (!a.game?.in('BetSetup')) return
         if (a !== a.game.currentPlayer) return
+        
     }
 }
 
