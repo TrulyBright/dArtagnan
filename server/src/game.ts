@@ -34,9 +34,10 @@ type RoundCeremonyProps = {
 
 type GameOverProps = {
     readonly winner: Player
-}
+} // No switch
 
 export type GameIn<S extends State> = GameBase<S> & Props<S>
+// @ts-expect-error
 export const isGameIn = <S extends State>(g: Player['game'], s: S): g is GameIn<S> => (
     g?.state === s
 )

@@ -2,12 +2,13 @@ import { RoomBase } from "@dartagnan/api/room"
 import { Code } from "@dartagnan/api/code"
 import { Event } from "@dartagnan/api/event"
 import { User } from "#user"
-import { Game } from "#game"
+import { GameIn } from "#game"
+import { State } from "@dartagnan/api/game"
 
 export class Room implements RoomBase {
     readonly users: User[] = []
     host: User | null = null
-    game: Game | null = null
+    game: GameIn<State> | null = null
     constructor(public code: Code) { }
     get startable() {
         return this.game === null && this.users.length >= 3
