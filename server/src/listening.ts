@@ -9,4 +9,9 @@ export class Listening<T> {
         this.listeners.push(l)
         return this
     }
+    removeListener(l: Listener<T>) {
+        const i = this.listeners.indexOf(l)
+        if (i === -1) throw new Error("Listener not found")
+        this.listeners.splice(i, 1)
+    }
 }

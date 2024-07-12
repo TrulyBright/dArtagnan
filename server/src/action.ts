@@ -3,6 +3,7 @@ import { Player } from "#player"
 import { User } from "#user"
 import { Action, DrawCard, PlayCard, Shoot, Speak, StartGame, SetDrift, UserAction } from "@dartagnan/api/action"
 import { Drift } from "@dartagnan/api/drift"
+import { GameIdle, isGameIn } from "#game"
 
 type ActorByAction<A extends Action> = A extends UserAction ? User : Player
 
@@ -30,7 +31,14 @@ class CStartGame implements Cmd<StartGame> {
         if (a.room?.host !== a) return
         if (!a.room.startable) return
         if (a.room.game) return
-        a.room.startGame()
+        const g = new GameIdle()
+        a.room.users.forEach((u, i) => {
+            const p = new Player(i)
+            g.addPlayer(p)
+            u.associate(p)
+        })
+        a.room.game = g
+        g.switchTo('BetSetup')
     }
 }
 
@@ -39,6 +47,8 @@ class CShoot implements Cmd<Shoot> {
     constructor(readonly index: number) {}
     readonly isUserCmd = false
     exec(a: Player): void {
+        if (!isGameIn(a.game, 'Turn')) return
+        if (a !== a.game.currentPlayer) return
     }
 }
 

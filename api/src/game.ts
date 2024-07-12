@@ -1,5 +1,8 @@
 import { PlayerBase } from "#player"
 
-export type GameBase = {
-    readonly players: PlayerBase[]
+export type State = 'Idle' | 'BetSetup' | 'Turn' | 'RoundCeremony' | 'GameOver'
+
+export type GameBase<S extends State> = {
+    state: S
+    readonly players: readonly PlayerBase[]
 }

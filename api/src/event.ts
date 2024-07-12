@@ -12,7 +12,7 @@ export class UserEntered {
     constructor(readonly user: UserBase) { }
 }
 
-export class Turn {
+export class NowTurnOf {
     constructor(readonly player: PlayerBase) { }
 }
 
@@ -22,7 +22,7 @@ const userEvents = [
 ] as const
 
 const playerEvents = [
-    Turn
+    NowTurnOf
 ] as const
 
 const events = [...userEvents, ...playerEvents] as const

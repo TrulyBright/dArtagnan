@@ -10,13 +10,10 @@ export class Room implements RoomBase {
     game: Game | null = null
     constructor(public code: Code) { }
     get startable() {
-        return this.users.length >= Game.MIN_PLAYERS
+        return this.game === null && this.users.length >= 3
     }
     broadcast(e: Event) {
         this.users.forEach(u => u.recv(e))
-    }
-    startGame() {
-        // TODO
     }
     setHost(u: User) {
         this.host = u

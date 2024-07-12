@@ -10,4 +10,12 @@ export class User extends Listening<Event> implements UserBase {
     room: Room | null = null
     player: Player | null = null
     constructor(readonly name: Username) { super() }
+    associate(p: Player) {
+        this.player = p
+        this.listeners.forEach(l => p.addListener(l))
+    }
+    disassociate() {
+        this.listeners.forEach(l => this.player?.removeListener(l))
+        this.player = null
+    }
 }
