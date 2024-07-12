@@ -5,8 +5,9 @@
             "dependsOn": ["^build"],
             "outputs": ["dist/**"]
         },
-        "lint": {
-            "dependsOn": ["^lint"]
+        "format-lint": {},
+        "format-lint:fix": {
+            "cache": false
         },
         "test": {
             "dependsOn": ["^test"]

@@ -2,14 +2,12 @@
 	"name": "dartagnan",
 	"private": true,
 	"scripts": {
-	  "build": "turbo run build",
-	  "dev": "turbo run dev",
-	  "lint": "turbo run lint",
-	  "check-types": "turbo run check-types",
-	  "clean": "turbo run clean"
+		"build": "turbo run build",
+		"dev": "turbo run dev",
+		"clean": "turbo run clean"
 	},
 	"devDependencies": {
-	  "turbo": "latest"
+		"turbo": "latest"
 	},
 	"packageManager": "pnpm@9.5.0"
-  }
+}

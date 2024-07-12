@@ -3,7 +3,7 @@ export type Listener<T> = (e: T) => void
 export class Listening<T> {
     protected readonly listeners: Listener<T>[] = []
     recv(e: T) {
-        this.listeners.forEach(l => l(e))
+        for (const l of this.listeners) l(e)
     }
     addListener(l: Listener<T>) {
         this.listeners.push(l)

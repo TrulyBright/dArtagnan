@@ -1,6 +1,6 @@
-import { PlayerBase } from "#player"
+import type { PlayerBase } from "#player"
 
-export type State = 'Idle' | 'BetSetup' | 'Turn' | 'RoundCeremony' | 'GameOver'
+export type State = "Idle" | "BetSetup" | "Turn" | "RoundCeremony" | "GameOver"
 
 export type GameBase<S extends State> = {
     state: S

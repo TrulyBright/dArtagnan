@@ -1,21 +1,23 @@
-import { UserBase, Username } from "@dartagnan/api/user"
-import { Room } from "#room"
-import { Event } from "@dartagnan/api/event"
+import type { Event } from "@dartagnan/api/event"
+import type { UserBase, Username } from "@dartagnan/api/user"
 import { Listening } from "#listening"
-import { Player } from "#player"
+import type { Player } from "#player"
+import type { Room } from "#room"
 
 export class User extends Listening<Event> implements UserBase {
     private static nextId = 0
     readonly id = User.nextId++
     room: Room | null = null
     player: Player | null = null
-    constructor(readonly name: Username) { super() }
+    constructor(readonly name: Username) {
+        super()
+    }
     associate(p: Player) {
         this.player = p
-        this.listeners.forEach(l => p.addListener(l))
+        for (const l of this.listeners) p.addListener(l)
     }
     disassociate() {
-        this.listeners.forEach(l => this.player?.removeListener(l))
+        for (const l of this.listeners) this.player?.removeListener(l)
         this.player = null
     }
 }

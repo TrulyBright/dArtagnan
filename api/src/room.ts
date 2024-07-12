@@ -1,5 +1,5 @@
-import { Code } from "#code"
-import { UserBase } from "#user"
+import type { Code } from "#code"
+import type { UserBase } from "#user"
 
 export type RoomBase = {
     readonly users: UserBase[]

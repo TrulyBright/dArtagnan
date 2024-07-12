@@ -1,6 +1,6 @@
 import { WebSocketServer } from "ws"
-import { Hub } from "#hub"
 import { GameServer } from "#gameServer"
+import { Hub } from "#hub"
 
 const H = new Hub()
 const GS = new GameServer(H)

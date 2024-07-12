@@ -4,4 +4,4 @@ export type UserBase = {
 }
 
 export type Username = string & { __brand: "username" }
-export const isUsername = (s: unknown): s is Username => typeof s === 'string' // TODO
+export const isUsername = (s: unknown): s is Username => typeof s === "string" // TODO

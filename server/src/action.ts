@@ -1,9 +1,18 @@
+import type {
+    Action,
+    DrawCard,
+    PlayCard,
+    SetDrift,
+    Shoot,
+    Speak,
+    StartGame,
+    UserAction,
+} from "@dartagnan/api/action"
+import type { Drift } from "@dartagnan/api/drift"
 import { UserSpoke } from "@dartagnan/api/event"
-import { Player } from "#player"
-import { User } from "#user"
-import { Action, DrawCard, PlayCard, Shoot, Speak, StartGame, SetDrift, UserAction } from "@dartagnan/api/action"
-import { Drift } from "@dartagnan/api/drift"
 import { GameIdle } from "#game"
+import { Player } from "#player"
+import type { User } from "#user"
 
 type ActorByAction<A extends Action> = A extends UserAction ? User : Player
 
@@ -13,7 +22,7 @@ type Cmd<A extends Action> = {
 } & A
 
 class CSpeak implements Cmd<Speak> {
-    readonly tag = 'Speak'
+    readonly tag = "Speak"
     constructor(readonly message: string) {
         this.message = this.message.slice(80).trim()
     }
@@ -26,7 +35,7 @@ class CSpeak implements Cmd<Speak> {
 
 class CStartGame implements Cmd<StartGame> {
     readonly isUserCmd = true
-    readonly tag = 'StartGame'
+    readonly tag = "StartGame"
     exec(a: User): void {
         if (a.room?.host !== a) return
         if (!a.room.startable) return
@@ -35,53 +44,56 @@ class CStartGame implements Cmd<StartGame> {
         a.room.users.forEach((u, i) => {
             const p = new Player(i)
             g.addPlayer(p)
+            p.join(g)
             u.associate(p)
         })
         a.room.game = g
-        g.switchTo('BetSetup')
+        g.switchTo("BetSetup")
     }
 }
 
 class CShoot implements Cmd<Shoot> {
-    readonly tag = 'Shoot'
+    readonly tag = "Shoot"
     constructor(readonly index: number) {}
     readonly isUserCmd = false
     exec(a: Player): void {
-        if (!a.game?.in('BetSetup')) return
+        if (!a.game?.in("BetSetup")) return
         if (a !== a.game.currentPlayer) return
-        
     }
 }
 
 class CDrawCard implements Cmd<DrawCard> {
     readonly isUserCmd = false
-    readonly tag = 'DrawCard'
-    exec(a: Player): void {
-    }
+    readonly tag = "DrawCard"
+    exec(a: Player): void {}
 }
 
 class CPlayCard implements Cmd<PlayCard> {
     readonly isUserCmd = false
     readonly tag = "PlayCard"
-    exec(a: Player): void {
-    }
+    exec(a: Player): void {}
 }
 
 class CSetDrift implements Cmd<SetDrift> {
-    readonly tag = 'SetDrift'
+    readonly tag = "SetDrift"
     constructor(readonly drift: Drift) {}
     readonly isUserCmd = false
-    exec(a: Player): void {
-    }
+    exec(a: Player): void {}
 }
 
 export const dispatch = <T extends Action>(a: T) => {
     switch (a.tag) {
-        case 'Speak': return new CSpeak(a.message)
-        case 'StartGame': return new CStartGame()
-        case 'Shoot': return new CShoot(a.index)
-        case 'DrawCard': return new CDrawCard()
-        case 'PlayCard': return new CPlayCard()
-        case 'SetDrift': return new CSetDrift(a.drift)
+        case "Speak":
+            return new CSpeak(a.message)
+        case "StartGame":
+            return new CStartGame()
+        case "Shoot":
+            return new CShoot(a.index)
+        case "DrawCard":
+            return new CDrawCard()
+        case "PlayCard":
+            return new CPlayCard()
+        case "SetDrift":
+            return new CSetDrift(a.drift)
     }
 }
