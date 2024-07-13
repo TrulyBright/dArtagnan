@@ -9,10 +9,11 @@ import type {
     UserAction,
 } from "@dartagnan/api/action"
 import type { Drift } from "@dartagnan/api/drift"
-import { UserSpoke } from "@dartagnan/api/event"
+import { PlayerDrewCard, PlayerShot, PlayerStatus, UserSpoke, YourCard } from "@dartagnan/api/event"
 import { GameIdle } from "#game"
 import { Player } from "#player"
 import type { User } from "#user"
+import { CARD_CONSTS, randomCard } from "@dartagnan/api/card"
 
 type ActorByAction<A extends Action> = A extends UserAction ? User : Player
 
@@ -57,28 +58,64 @@ class CShoot implements Cmd<Shoot> {
     constructor(readonly index: number) {}
     readonly isUserCmd = false
     exec(a: Player): void {
-        if (!a.game?.in("BetSetup")) return
+        if (!a.game?.in("Turn")) return
         if (a !== a.game.currentPlayer) return
+        const target = a.game.players.at(this.index)
+        if (!target) return
+        a.game.broadcast(new PlayerShot(a, target))
+        if (a.buff.Curse) {
+            a.buff.Curse = false
+            a.game.broadcast(new PlayerStatus(a))
+            target.accuracy = CARD_CONSTS.CURSE_ACCURACY
+            a.game.broadcast(new PlayerStatus(target))
+        }
+        const success = Math.random() < a.accuracy
+        if (!success) {} // do nothing
+        else if (target.buff.Bulletproof) {
+            target.buff.Bulletproof = false
+            a.game.broadcast(new PlayerStatus(target))
+        } else {
+            const loot = a.buff.Robbery ? a.game.bet * CARD_CONSTS.ROBBERY_MULTIPLIER : a.game.bet
+            a.deposit(target.withdraw(loot))
+            a.buff.Robbery = false
+            target.seated = false
+            if (target.buff.Insurance) target.deposit(CARD_CONSTS.INSURANCE_PAYOUT)
+            a.game.broadcast(new PlayerStatus(a))
+            a.game.broadcast(new PlayerStatus(target))
+        }
+        a.game.switchTo(a.game.seated.length === 1 ? "RoundCeremony" : "Turn")
     }
 }
 
 class CDrawCard implements Cmd<DrawCard> {
     readonly isUserCmd = false
     readonly tag = "DrawCard"
-    exec(a: Player): void {}
+    exec(a: Player): void {
+        if (!a.game?.in("Turn")) return
+        if (a !== a.game.currentPlayer) return
+        a.card = randomCard()
+        a.recv(new YourCard(a.card))
+        a.game.broadcast(new PlayerDrewCard(a))
+        a.game.switchTo("Turn")
+    }
 }
 
 class CPlayCard implements Cmd<PlayCard> {
     readonly isUserCmd = false
     readonly tag = "PlayCard"
-    exec(a: Player): void {}
+    exec(a: Player): void {
+        // TODO
+    }
 }
 
 class CSetDrift implements Cmd<SetDrift> {
     readonly tag = "SetDrift"
     constructor(readonly drift: Drift) {}
     readonly isUserCmd = false
-    exec(a: Player): void {}
+    exec(a: Player): void {
+        a.drift = this.drift
+        a.game?.broadcast(new PlayerStatus(a))
+    }
 }
 
 export const dispatch = <T extends Action>(a: T) => {
