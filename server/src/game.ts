@@ -1,5 +1,7 @@
 import type { GameBase, State } from "@dartagnan/api/game"
 import type { Player } from "#player"
+import type { Listener } from "#listening"
+import type { BetSetupDone, BetSetupStart, Event } from "@dartagnan/api/event"
 
 // biome-ignore format: better look like a switch-case
 type Props<S = State> =
@@ -19,6 +21,7 @@ interface Guardable {
 type IdleProps = {
     addPlayer(p: Player): void
     removePlayer(p: Player): void
+    addListener(l: Listener<Event>): void
 } & Switching<"BetSetup">
 
 type BetSetupProps = {
@@ -44,38 +47,56 @@ type GameOverProps = {
     readonly winner: Player
 }
 
-export type GameIn<S extends State> = GameBase<S> & Props<S> & Guardable
+abstract class Broadcasting {
+    abstract readonly listeners: readonly Listener<Event>[]
+    broadcast(e: Event): void {
+        for (const l of this.listeners) l(e)
+    }
+}
 
-export class GameIdle implements GameIn<"Idle"> {
+export type GameIn<S extends State> = GameBase<S> & Props<S> & Guardable & Broadcasting
+
+export class GameIdle extends Broadcasting implements GameIn<"Idle"> {
     state = "Idle" as const
     round: null = null
-    players: Player[] = []
+    private readonly _players: Player[] = []
+    get players(): readonly Player[] { return this._players }
+    readonly listeners: Listener<Event>[] = []
+    addListener(l: Listener<Event>): void {
+        this.listeners.push(l)
+    }
     switchTo(s: "BetSetup") {
         return new GameBetSetup(this)
     }
     addPlayer(p: Player) {
-        this.players.push(p)
+        this._players.push(p)
     }
     removePlayer(p: Player) {
-        const i = this.players.indexOf(p)
+        const i = this._players.indexOf(p)
         if (i === -1) return
-        this.players.splice(i, 1)
+        this._players.splice(i, 1)
     }
     in<S extends State>(s: S): this is GameIn<S> {
         return this.state === s
     }
 }
 
-class GameBetSetup implements GameIn<"BetSetup"> {
+class GameBetSetup extends Broadcasting implements GameIn<"BetSetup"> {
     readonly state = "BetSetup" as const
     readonly currentPlayer: Player
     bet: number | null = null
     readonly round: number
     readonly players: readonly Player[]
+    readonly listeners: readonly Listener<Event>[]
     constructor(g: GameIdle | GameRoundCeremony) {
+        super()
         this.currentPlayer = g.state === "Idle" ? g.players[0] : g.winner
         this.round = g.round ? g.round + 1 : 1
         this.players = g.players
+        this.listeners = g.listeners
+    }
+    get betWindow(): readonly [number, number] {
+        return [5 * this.round, 5 * this.round + 10]
     }
     setBet(b: number) {
         this.bet = b
@@ -83,23 +104,23 @@ class GameBetSetup implements GameIn<"BetSetup"> {
     switchTo(s: "Turn") {
         return new GameTurn(this)
     }
-    get betWindow(): readonly [number, number] {
-        return [5 * this.round, 5 * this.round + 10]
-    }
     in<S extends State>(s: S): this is GameIn<S> {
         return this.state === s
     }
 }
 
-class GameRoundCeremony implements GameIn<"RoundCeremony"> {
+class GameRoundCeremony extends Broadcasting implements GameIn<"RoundCeremony"> {
     readonly state = "RoundCeremony" as const
     readonly winner: Player
     readonly round: number
     readonly players: readonly Player[]
+    readonly listeners: readonly Listener<Event>[]
     constructor(g: GameTurn) {
+        super()
         this.winner = g.seated[0]
         this.round = g.round
         this.players = g.players
+        this.listeners = g.listeners
     }
     get seated(): readonly Player[] {
         return this.players.filter(p => p.seated)
@@ -113,13 +134,15 @@ class GameRoundCeremony implements GameIn<"RoundCeremony"> {
     }
 }
 
-class GameTurn implements GameIn<"Turn"> {
+class GameTurn extends Broadcasting implements GameIn<"Turn"> {
     readonly state = "Turn" as const
     readonly currentPlayer: Player
     readonly bet: number
     readonly round: number
     readonly players: readonly Player[]
+    readonly listeners: readonly Listener<Event>[]
     constructor(g: GameBetSetup | GameTurn) {
+        super()
         this.currentPlayer = g.currentPlayer
         if (!g.bet)
             // should never happen
@@ -127,6 +150,7 @@ class GameTurn implements GameIn<"Turn"> {
         this.bet = g.bet
         this.round = g.round
         this.players = g.players
+        this.listeners = g.listeners
     }
     get seated(): readonly Player[] {
         return this.players.filter(p => p.seated)
@@ -143,13 +167,16 @@ class GameTurn implements GameIn<"Turn"> {
     }
 }
 
-class GameOver implements GameIn<"GameOver"> {
+class GameOver extends Broadcasting implements GameIn<"GameOver"> {
     readonly state = "GameOver" as const
     readonly winner: Player
     readonly players: readonly Player[]
+    readonly listeners: readonly Listener<Event>[]
     constructor(g: GameRoundCeremony) {
+        super()
         this.winner = g.winner
         this.players = g.players
+        this.listeners = g.listeners
     }
     in<S extends State>(s: S): this is GameIn<S> {
         return this.state === s
