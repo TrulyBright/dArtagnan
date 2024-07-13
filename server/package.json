@@ -11,6 +11,7 @@
 	},
 	"dependencies": {
 		"@dartagnan/api": "workspace:*",
+		"typescript-fsm": "^1.4.5",
 		"ws": "^8.18.0"
 	},
 	"devDependencies": {

@@ -1,4 +1,5 @@
 import type { Card } from "#card"
+import { GameBase } from "#game"
 import type { PlayerBase } from "#player"
 import type { UserBase } from "#user"
 
@@ -48,6 +49,28 @@ export class PlayerDrewCard {
     constructor(readonly player: PlayerBase) {}
 }
 
+export class Countdown {
+    constructor(readonly full: number, readonly remain: number) {}
+}
+
+export class RoundWinner {
+    constructor(readonly player: PlayerBase) {}
+}
+
+export class GameOver {}
+
+export class TurnOrder {
+    constructor(readonly order: GameBase['turnOrder']) {}
+}
+
+export class CardPlayed {
+    constructor(readonly card: Card) {}
+}
+
+export class Stakes {
+    constructor(readonly stakes: number) {}
+}
+
 const userEvents = [UserSpoke, UserEntered] as const
 
 const playerEvents = [
@@ -58,6 +81,12 @@ const playerEvents = [
     PlayerShot,
     YourCard,
     PlayerDrewCard,
+    Countdown,
+    RoundWinner,
+    GameOver,
+    TurnOrder,
+    CardPlayed,
+    Stakes
 ] as const
 
 const events = [...userEvents, ...playerEvents] as const
