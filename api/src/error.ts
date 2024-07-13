@@ -5,3 +5,9 @@ export class NoSuchRoom extends Error {
         super(`No room with code ${code}`)
     }
 }
+
+export class RoomFull extends Error {
+    constructor() {
+        super("Room is full")
+    }
+}

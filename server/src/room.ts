@@ -13,6 +13,12 @@ export class Room implements RoomBase {
     get startable() {
         return this.game === null && this.users.length >= 3
     }
+    get empty() {
+        return this.users.length === 0
+    }
+    get full() {
+        return this.users.length === 8
+    }
     broadcast(e: Event) {
         for (const u of this.users) u.recv(e)
     }

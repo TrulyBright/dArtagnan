@@ -12,6 +12,12 @@ export class User extends Listening<Event> implements UserBase {
     constructor(readonly name: Username) {
         super()
     }
+    setRoom(r: Room) {
+        this.room = r
+    }
+    unsetRoom() {
+        this.room = null
+    }
     associate(p: Player) {
         this.player = p
         for (const l of this.listeners) p.addListener(l)

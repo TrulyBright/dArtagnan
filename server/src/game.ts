@@ -73,9 +73,6 @@ class GameBetSetup implements GameIn<"BetSetup"> {
     readonly round: number
     readonly players: readonly Player[]
     constructor(g: GameIdle | GameRoundCeremony) {
-        if (!g.players[0])
-            // should never happen
-            throw new Error("No players")
         this.currentPlayer = g.state === "Idle" ? g.players[0] : g.winner
         this.round = g.round ? g.round + 1 : 1
         this.players = g.players
@@ -100,9 +97,6 @@ class GameRoundCeremony implements GameIn<"RoundCeremony"> {
     readonly round: number
     readonly players: readonly Player[]
     constructor(g: GameTurn) {
-        if (!g.seated[0])
-            // should never happen
-            throw new Error("No players")
         this.winner = g.seated[0]
         this.round = g.round
         this.players = g.players

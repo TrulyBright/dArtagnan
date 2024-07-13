@@ -25,7 +25,7 @@ export class GameServer {
                 if (cmd.isUserCmd) cmd.exec(user)
                 else if (user.player) cmd.exec(user.player)
             }).once("close", () => {
-                user.room?.removeUser(user)
+                this.hub.removeUser(user)
             })
         })
         this.connectedWss.add(wss)
