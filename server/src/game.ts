@@ -1,7 +1,7 @@
-import type { GameBase, State } from "@dartagnan/api/game"
-import type { Player } from "#player"
-import type { Listener } from "#listening"
 import type { BetSetupDone, BetSetupStart, Event } from "@dartagnan/api/event"
+import type { GameBase, State } from "@dartagnan/api/game"
+import type { Listener } from "#listening"
+import type { Player } from "#player"
 
 // biome-ignore format: better look like a switch-case
 type Props<S = State> =
@@ -13,10 +13,6 @@ type Props<S = State> =
     never
 
 type Switching<S extends State> = { switchTo(s: S): GameIn<S> }
-
-interface Guardable {
-    in<S extends State>(s: S): this is GameIn<S>
-}
 
 type IdleProps = {
     addPlayer(p: Player): void
@@ -47,27 +43,26 @@ type GameOverProps = {
     readonly winner: Player
 } // no switching
 
-abstract class Broadcasting {
+abstract class StateBase {
+    abstract readonly state: State
     abstract readonly listeners: readonly Listener<Event>[]
+    in<S extends State>(s: S): this is GameIn<S> {
+        return this.state === s
+    }
     broadcast(e: Event): void {
         for (const l of this.listeners) l(e)
     }
 }
 
-abstract class InState extends Broadcasting {
-    abstract readonly state: State
-    in<S extends State>(s: S): this is GameIn<S> { return this.state === s }
-}
-
-const StateBase = InState
-
-export type GameIn<S extends State> = GameBase<S, Player> & Props<S> & Guardable & Broadcasting
+export type GameIn<S extends State> = GameBase<S, Player> & Props<S> & StateBase
 
 export class GameIdle extends StateBase implements GameIn<"Idle"> {
     state = "Idle" as const
     round: null = null
     private readonly _players: Player[] = []
-    get players(): readonly Player[] { return this._players }
+    get players(): readonly Player[] {
+        return this._players
+    }
     readonly listeners: Listener<Event>[] = []
     addListener(l: Listener<Event>): void {
         this.listeners.push(l)
@@ -143,14 +138,20 @@ class GameTurn extends StateBase implements GameIn<"Turn"> {
         super()
         if (!g.bet)
             // should never happen
-            throw new Error("bet not set. Switch to BetSetup first to set the bet.")
+            throw new Error(
+                "bet not set. Switch to BetSetup first to set the bet.",
+            )
         this.bet = g.bet
         this.round = g.round
         this.players = g.players
         this.listeners = g.listeners
-        this.currentPlayer = g.state === 'BetSetup'
-            ? g.currentPlayer
-            : this.seated[(this.seated.indexOf(g.currentPlayer) + 1) % this.seated.length] // next player
+        this.currentPlayer =
+            g.state === "BetSetup"
+                ? g.currentPlayer
+                : this.seated[
+                      (this.seated.indexOf(g.currentPlayer) + 1) %
+                          this.seated.length
+                  ] // next player
     }
     get seated(): readonly Player[] {
         return this.players.filter(p => p.seated)

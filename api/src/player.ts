@@ -1,5 +1,5 @@
-import { Buff } from "#card"
-import { Drift } from "#drift"
+import type { Buff } from "#card"
+import type { Drift } from "#drift"
 
 export type PlayerBase = {
     readonly index: number

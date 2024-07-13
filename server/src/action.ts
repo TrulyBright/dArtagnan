@@ -8,12 +8,18 @@ import type {
     StartGame,
     UserAction,
 } from "@dartagnan/api/action"
+import { CARD_CONSTS, randomCard } from "@dartagnan/api/card"
 import type { Drift } from "@dartagnan/api/drift"
-import { PlayerDrewCard, PlayerShot, PlayerStatus, UserSpoke, YourCard } from "@dartagnan/api/event"
+import {
+    PlayerDrewCard,
+    PlayerShot,
+    PlayerStatus,
+    UserSpoke,
+    YourCard,
+} from "@dartagnan/api/event"
 import { GameIdle } from "#game"
 import { Player } from "#player"
 import type { User } from "#user"
-import { CARD_CONSTS, randomCard } from "@dartagnan/api/card"
 
 type ActorByAction<A extends Action> = A extends UserAction ? User : Player
 
@@ -70,16 +76,20 @@ class CShoot implements Cmd<Shoot> {
             a.game.broadcast(new PlayerStatus(target))
         }
         const success = Math.random() < a.accuracy
-        if (!success) {} // do nothing
+        if (!success) {
+        } // do nothing
         else if (target.buff.Bulletproof) {
             target.buff.Bulletproof = false
             a.game.broadcast(new PlayerStatus(target))
         } else {
-            const loot = a.buff.Robbery ? a.game.bet * CARD_CONSTS.ROBBERY_MULTIPLIER : a.game.bet
+            const loot = a.buff.Robbery
+                ? a.game.bet * CARD_CONSTS.ROBBERY_MULTIPLIER
+                : a.game.bet
             a.deposit(target.withdraw(loot))
             a.buff.Robbery = false
             target.seated = false
-            if (target.buff.Insurance) target.deposit(CARD_CONSTS.INSURANCE_PAYOUT)
+            if (target.buff.Insurance)
+                target.deposit(CARD_CONSTS.INSURANCE_PAYOUT)
             a.game.broadcast(new PlayerStatus(a))
             a.game.broadcast(new PlayerStatus(target))
         }

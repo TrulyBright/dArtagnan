@@ -1,10 +1,10 @@
+import { BuffStatusReset, type Card } from "@dartagnan/api/card"
+import { randomDrift } from "@dartagnan/api/drift"
 import type { Event } from "@dartagnan/api/event"
 import type { State } from "@dartagnan/api/game"
 import type { PlayerBase } from "@dartagnan/api/player"
 import type { GameIn } from "#game"
 import { Listening } from "#listening"
-import { BuffStatusReset, Card } from "@dartagnan/api/card"
-import { randomDrift } from "@dartagnan/api/drift"
 
 export class Player extends Listening<Event> implements PlayerBase {
     game: GameIn<State> | null = null
@@ -30,7 +30,8 @@ export class Player extends Listening<Event> implements PlayerBase {
      * @returns the balance after the deposit.
      */
     deposit(n: number) {
-        return this.balance += n
+        this.balance += n
+        return this.balance
     }
     /**
      * Withdraws the given amount from the balance.

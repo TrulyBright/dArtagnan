@@ -1,4 +1,4 @@
-import { Card } from "#card"
+import type { Card } from "#card"
 import type { PlayerBase } from "#player"
 import type { UserBase } from "#user"
 
@@ -30,7 +30,10 @@ export class BetSetupDone {
 }
 
 export class PlayerShot {
-    constructor(readonly shooter: PlayerBase, readonly target: PlayerBase) {}
+    constructor(
+        readonly shooter: PlayerBase,
+        readonly target: PlayerBase,
+    ) {}
 }
 
 export class PlayerStatus {
@@ -54,7 +57,7 @@ const playerEvents = [
     BetSetupDone,
     PlayerShot,
     YourCard,
-    PlayerDrewCard
+    PlayerDrewCard,
 ] as const
 
 const events = [...userEvents, ...playerEvents] as const

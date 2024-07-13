@@ -3,16 +3,15 @@ export const CARD_CONSTS = {
     INSURANCE_PAYOUT: 100,
     BULLETPROOF_COST: 7,
     CURSE_ACCURACY: 0.1,
-    ROBBERY_MULTIPLIER: 4
+    ROBBERY_MULTIPLIER: 4,
 }
 export type Buff =
-    | 'Insurance' // Pay premium to get payout on death.
-    | 'Bulletproof' // Pay to be immune to the next shot.
-    | 'Curse' // The target's accuracy becomes very low.
-    | 'Robbery' // Take over few times more from the target's balance.
+    | "Insurance" // Pay premium to get payout on death.
+    | "Bulletproof" // Pay to be immune to the next shot.
+    | "Curse" // The target's accuracy becomes very low.
+    | "Robbery" // Take over few times more from the target's balance.
 
-export type OneOff =
-    | 'Sharpshooter'
+export type OneOff = "Sharpshooter"
 
 export type Card = Buff | OneOff
 
@@ -23,18 +22,19 @@ export type Card = Buff | OneOff
  * @readonly
  */
 const CardPool: Array<Card> = [
-    'Insurance',
-    'Bulletproof',
-    'Curse',
-    'Robbery',
-    'Sharpshooter',
+    "Insurance",
+    "Bulletproof",
+    "Curse",
+    "Robbery",
+    "Sharpshooter",
 ] as const
 
-export const randomCard = (): Card => CardPool[Math.floor(Math.random() * CardPool.length)]
+export const randomCard = (): Card =>
+    CardPool[Math.floor(Math.random() * CardPool.length)]
 
 export const BuffStatusReset: Record<Buff, false> = {
     Insurance: false,
     Bulletproof: false,
     Curse: false,
-    Robbery: false
+    Robbery: false,
 } as const
