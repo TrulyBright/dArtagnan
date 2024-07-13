@@ -16,9 +16,35 @@ export class NowTurnOf {
     constructor(readonly player: PlayerBase) {}
 }
 
+export class NewRound {
+    constructor(readonly round: number) {}
+}
+
+export class BetSetupStart {
+    constructor(readonly player: PlayerBase) {}
+}
+
+export class BetSetupDone {
+    constructor(readonly bet: number) {}
+}
+
+export class PlayerShot {
+    constructor(readonly shooter: PlayerBase, readonly target: PlayerBase) {}
+}
+
+export class PlayerStatus {
+    constructor(readonly player: PlayerBase) {}
+}
+
 const userEvents = [UserSpoke, UserEntered] as const
 
-const playerEvents = [NowTurnOf] as const
+const playerEvents = [
+    NewRound,
+    NowTurnOf,
+    BetSetupStart,
+    BetSetupDone,
+    PlayerShot
+] as const
 
 const events = [...userEvents, ...playerEvents] as const
 
