@@ -1,57 +1,74 @@
-type Tagged<T extends string> = { readonly tag: T }
+type Tagged<T extends string> = {
+    readonly tag: T,
+    [k: string]: unknown
+}
 
-export type Insurance = Tagged<"Insurance"> & {
-    premium: 10
+export const Insurance = {
+    tag: "Insurance",
+    premium: 10,
     payout: 80
-}
+} as const satisfies Tagged<"Insurance">
 
-export type Bulletproof = Tagged<"Bulletproof"> & {
+export const Bulletproof = {
+    tag: "Bulletproof",
     cost: 7
-}
+} as const satisfies Tagged<"Bulletproof">
 
-export type Curse = Tagged<"Curse"> & {
+export const Curse = {
+    tag: "Curse",
     accuracy: 0.1
-}
+} as const satisfies Tagged<"Curse">
 
-export type Robbery = Tagged<"Robbery"> & {
+export const Robbery = {
+    tag: "Robbery",
     multiplier: 4
-}
+} as const satisfies Tagged<"Robbery">
 
-export type Mediation = Tagged<"Mediation">
+export const Mediation = {
+    tag: "Mediation"
+} as const satisfies Tagged<"Mediation">
 
-export type LastDitch = Tagged<"LastDitch"> & {
+export const LastDitch = {
+    tag: "LastDitch",
     penalty: 0.25
-}
+} as const satisfies Tagged<"LastDitch">
 
-export type Sharpshooter = Tagged<"Sharpshooter"> & {
+export const Sharpshooter = {
+    tag: "Sharpshooter",
     accuracy: 0.9
-}
+} as const satisfies Tagged<"Sharpshooter">
 
-export type Reverse = Tagged<"Reverse">
+export const Reverse = {
+    tag: "Reverse"
+} as const satisfies Tagged<"Reverse">
 
-export type Run = Tagged<"Run"> & {
+export const Run = {
+    tag: "Run",
     share: 0.2
-}
+} as const satisfies Tagged<"Run">
 
-export type Donation = Tagged<"Donation"> & {
+export const Donation = {
+    tag: "Donation",
     amount: 50
-}
+} as const satisfies Tagged<"Donation">
 
-export type Destroy = Tagged<"Destroy">
+export const Destroy = {
+    tag: "Destroy"
+} as const satisfies Tagged<"Destroy">
 
 export type Buff =
-    | Insurance
-    | Bulletproof
-    | Curse
-    | Robbery
-    | Mediation
-    | LastDitch
+    | typeof Insurance
+    | typeof Bulletproof
+    | typeof Curse
+    | typeof Robbery
+    | typeof Mediation
+    | typeof LastDitch
 
 export type OneOff =
-    | Sharpshooter
-    | Reverse
-    | Run
-    | Donation
-    | Destroy
+    | typeof Sharpshooter
+    | typeof Reverse
+    | typeof Run
+    | typeof Donation
+    | typeof Destroy
 
 export type Card = Buff | OneOff
