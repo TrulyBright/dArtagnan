@@ -1,79 +1,109 @@
-import { Player } from "#player"
-import { BetSetupStart, Countdown, Event, GameOver, NewRound, NowTurnOf, RoundWinner } from "@dartagnan/api/event"
-import { GameBase, State } from "@dartagnan/api/game"
-import { t, StateMachine, Callback } from "typescript-fsm"
+import { LastDitch } from "@dartagnan/api/card"
+import {
+    BetSetupDone,
+    BetSetupStart,
+    Countdown,
+    type Event,
+    GameOver,
+    NewRound,
+    NowTurnOf,
+    RoundWinner,
+    Stakes,
+    TurnOrder,
+} from "@dartagnan/api/event"
+import type { GameBase, State } from "@dartagnan/api/game"
+import type { Player } from "#player"
 
-export enum FSMEvent { StartGame, StartBetSetup, SetBet, ToNextTurn, EndRound, NewRound, EndGame }
-
-export class Game extends StateMachine<State, FSMEvent, Record<FSMEvent, Callback>> implements GameBase {
+export class Game implements GameBase {
     private static readonly timeQuantum = 1000
     private static readonly timeLimit = Game.timeQuantum * 15
     private readonly _players: Player[] = []
-    get players(): readonly Player[] { return this._players }
-    private _turnOrder: GameBase['turnOrder'] = 1
-    get turnOrder() { return this._turnOrder }
+    get players(): readonly Player[] {
+        return this._players
+    }
+    private _turnOrder: GameBase["turnOrder"] = 1
+    get turnOrder() {
+        return this._turnOrder
+    }
+    state: State = "Idle"
     round = 0
-    currentPlayer : Player | null = null
-    private lastWinner: Player | null = null
+    readonly maxRound = 4
     bet = 10
     stakes = 0
-    private countdown: NodeJS.Timeout | null = null
+    currentPlayer: Player | null = null
+    private lastWinner: Player | null = null
     private timeRemaining = Game.timeLimit
-    constructor(readonly maxRound: number) {
-        super(State.Idle)
-        this.addTransitions([
-            t(State.Idle, FSMEvent.StartGame, State.RoundInit, this.startRound),
-            t(State.RoundInit, FSMEvent.StartBetSetup, State.BetSetup, this.startBetSetup),
-            t(State.BetSetup, FSMEvent.SetBet, State.Turn, this.setBet),
-            t(State.Turn, FSMEvent.ToNextTurn, State.Turn, this.toNextTurn),
-            t(State.Turn, FSMEvent.EndRound, State.RoundCeremony, this.endRound),
-            t(State.RoundCeremony, FSMEvent.NewRound, State.RoundInit, this.startRound),
-            t(State.RoundCeremony, FSMEvent.EndGame, State.GameOver, this.endGame)
-        ])
+    private countdown: NodeJS.Timeout | null = null
+    get seated(): readonly Player[] {
+        return this.players.filter(p => p.seated)
     }
-    get seated(): readonly Player[] { return this.players.filter(p => p.seated) }
+    whoPlaysNext(p: Player) {
+        if (p.buff.LastDitch) return p
+        const i = this.seated.indexOf(p)
+        return this.seated[(i + this.turnOrder) % this.seated.length]
+    }
     broadcast<E extends Event>(e: E) {
-        for (const p of this.players)
-            p.recv(e)
+        for (const p of this.players) p.recv(e)
     }
     addPlayer(p: Player) {
-        if (this.getState() !== State.Idle) throw new Error("Game has already started")
+        if (this.state !== "Idle") return
         this._players.push(p)
     }
     removePlayer(p: Player) {
-        if (this.getState() !== State.Idle) throw new Error("Game has already started")
+        if (this.state !== "Idle") return
         const i = this.players.indexOf(p)
-        if (i === -1) throw new Error("Player not found")
-        this._players.splice(i, 1)
+        if (i !== -1) this._players.splice(i, 1)
     }
-    startTurnOf(p: Player) {
+    reverseTurnOrder() {
+        this._turnOrder *= -1
+        this.broadcast(new TurnOrder(this.turnOrder))
+    }
+    setStakes(s: number) {
+        this.stakes = s
+        this.broadcast(new Stakes(s))
+    }
+    /** Set the bet amount and proceed to the first turn. */
+    setBet(amount: number) {
         this.clearCountdown()
+        if (!this.currentPlayer) throw new Error("No current player")
+        this.bet = amount
+        this.broadcast(new BetSetupDone(amount))
+        this.enterTurn(this.currentPlayer)
+    }
+    start() {
+        this.enterRoundInit(1)
+    }
+    /** Proceed to the next turn, next round, or game over, depending on the context. */
+    turnDone() {
+        if (this.state !== "Turn") return
+        if (this.currentPlayer === null) throw new Error("No current player")
+        if (this.seated.length !== 1)
+            this.enterTurn(this.whoPlaysNext(this.currentPlayer))
+        else if (this.round === this.maxRound) this.enterRoundCeremony()
+        else this.enterRoundInit(this.round + 1)
+    }
+    @enterState("Turn")
+    private enterTurn(p: Player) {
         this.currentPlayer = p
         this.broadcast(new NowTurnOf(p))
+        p.unsetBuff(LastDitch)
         this.countdown = setInterval(() => {
             this.broadcast(new Countdown(Game.timeLimit, this.timeRemaining))
             if (this.timeRemaining <= 0) {
                 this.clearCountdown()
-                this.dispatch(this.seated.length === 1 ? FSMEvent.EndRound : FSMEvent.ToNextTurn)
-            }
-            this.timeRemaining -= Game.timeQuantum
-        }, 1000)
+                this.turnDone()
+            } else this.timeRemaining -= Game.timeQuantum
+        }, Game.timeQuantum)
     }
-    reverseTurnOrder() {
-        this._turnOrder *= -1
-    }
-    private clearCountdown() {
-        if (this.countdown) clearInterval(this.countdown)
-    }
-    private startRound() {
-        this.clearCountdown()
-        this.round++
-        this.broadcast(new NewRound(this.round))
+    @enterState("RoundInit")
+    private enterRoundInit(no: number) {
+        this.round = no
+        this.broadcast(new NewRound(no))
         for (const p of this.players) p.reset()
-        this.dispatch(FSMEvent.StartBetSetup)
+        this.enterBetSetup()
     }
-    private startBetSetup() {
-        this.clearCountdown()
+    @enterState("BetSetup")
+    private enterBetSetup() {
         if (this.round === 1) this.currentPlayer = this.seated[0]
         else if (!this.lastWinner)
             throw new Error("No last winner in previous round")
@@ -81,35 +111,35 @@ export class Game extends StateMachine<State, FSMEvent, Record<FSMEvent, Callbac
         this.broadcast(new BetSetupStart(this.currentPlayer))
         this.countdown = setInterval(() => {
             this.broadcast(new Countdown(Game.timeLimit, this.timeRemaining))
-            if (this.timeRemaining <= 0) {
-                this.clearCountdown()
-                this.dispatch(FSMEvent.SetBet)
-            }
-            this.timeRemaining -= Game.timeQuantum
-        }, 1000)
+            if (this.timeRemaining <= 0) this.setBet(10 * this.round)
+            else this.timeRemaining -= Game.timeQuantum
+        }, Game.timeQuantum)
     }
-    private setBet() {
-        this.clearCountdown()
-        if (!this.currentPlayer)
-            throw new Error("No current player")
-        this.startTurnOf(this.currentPlayer)
-    }
-    private toNextTurn() {
-        this.clearCountdown()
-        if (!this.currentPlayer) throw new Error("No current player")
-        const i = this.seated.indexOf(this.currentPlayer!)
-        this.currentPlayer = this.seated[(i + 1) % this.seated.length]
-        this.startTurnOf(this.currentPlayer)
-    }
-    private endRound() {
-        this.clearCountdown()
+    @enterState("RoundCeremony")
+    private enterRoundCeremony() {
         const lastManStanding = this.seated[0]
         this.lastWinner = lastManStanding
         this.broadcast(new RoundWinner(lastManStanding))
-        this.dispatch(this.round === this.maxRound ? FSMEvent.EndGame : FSMEvent.NewRound)
+        if (this.round === this.maxRound) this.enterGameOver()
+        else this.enterRoundInit(this.round + 1)
     }
-    private endGame() {
-        this.clearCountdown()
+    @enterState("GameOver")
+    private enterGameOver() {
         this.broadcast(new GameOver())
     }
+    protected clearCountdown() {
+        if (this.countdown) clearInterval(this.countdown)
+    }
 }
+
+const enterState =
+    (s: State) =>
+    (target: Game, name: string, descriptor: PropertyDescriptor) => {
+        const original = descriptor.value
+        descriptor.value = function (this: Game, ...args: unknown[]) {
+            this.state = s
+            this.clearCountdown()
+            return original.apply(this, args)
+        }
+        return descriptor
+    }

@@ -1,4 +1,4 @@
-import { PlayerBase } from "#player"
+import type { PlayerBase } from "#player"
 
 export type GameBase = {
     readonly players: readonly PlayerBase[]
@@ -9,4 +9,11 @@ export type GameBase = {
     readonly bet: number
     readonly stakes: number
 }
-export enum State { Idle, RoundInit, BetSetup, Turn, RoundCeremony, GameOver }
+
+export type State =
+    | "Idle"
+    | "RoundInit"
+    | "BetSetup"
+    | "Turn"
+    | "RoundCeremony"
+    | "GameOver"

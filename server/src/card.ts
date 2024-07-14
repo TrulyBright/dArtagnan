@@ -1,5 +1,19 @@
-import { Player } from "#player"
-import { Buff, Bulletproof, Card, Curse, Destroy, Donation, Insurance, LastDitch, Mediation, Reverse, Robbery, Run, Sharpshooter } from "@dartagnan/api/card"
+import {
+    type Buff,
+    Bulletproof,
+    type Card,
+    Curse,
+    Destroy,
+    Donation,
+    Insurance,
+    LastDitch,
+    Mediation,
+    Reverse,
+    Robbery,
+    Run,
+    Sharpshooter,
+} from "@dartagnan/api/card"
+import type { Player } from "#player"
 
 type CardStrategy = (p: Player) => void
 
@@ -58,7 +72,6 @@ const SDonation: CardStrategy = (p: Player) => {
     p.deposit(Donation.amount)
 }
 
-
 const SDestroy: CardStrategy = (p: Player) => {
     if (!p.game) return
     for (const s of p.game.seated) {
@@ -66,7 +79,7 @@ const SDestroy: CardStrategy = (p: Player) => {
     }
 }
 
-export const dispathCardStrategy = (c: Card): CardStrategy => {
+export const dispatchCardStrategy = (c: Card): CardStrategy => {
     switch (c.tag) {
         case "Insurance":
             return SInsurance
@@ -108,18 +121,18 @@ const cardPool = [
     Reverse,
     Run,
     Donation,
-    Destroy
+    Destroy,
 ] as const
 
 export const randomCard = (): Card => {
     return cardPool[Math.floor(Math.random() * cardPool.length)]
 }
 
-export const BuffResetLiteral: Record<Buff['tag'], false> = {
+export const BuffResetLiteral: Record<Buff["tag"], false> = {
     Insurance: false,
     Bulletproof: false,
     Curse: false,
     Robbery: false,
     Mediation: false,
-    LastDitch: false
+    LastDitch: false,
 }

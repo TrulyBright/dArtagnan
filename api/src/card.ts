@@ -1,59 +1,59 @@
 type Tagged<T extends string> = {
-    readonly tag: T,
+    readonly tag: T
     [k: string]: unknown
 }
 
 export const Insurance = {
     tag: "Insurance",
     premium: 10,
-    payout: 80
+    payout: 80,
 } as const satisfies Tagged<"Insurance">
 
 export const Bulletproof = {
     tag: "Bulletproof",
-    cost: 7
+    cost: 7,
 } as const satisfies Tagged<"Bulletproof">
 
 export const Curse = {
     tag: "Curse",
-    accuracy: 0.1
+    accuracy: 0.1,
 } as const satisfies Tagged<"Curse">
 
 export const Robbery = {
     tag: "Robbery",
-    multiplier: 4
+    multiplier: 4,
 } as const satisfies Tagged<"Robbery">
 
 export const Mediation = {
-    tag: "Mediation"
+    tag: "Mediation",
 } as const satisfies Tagged<"Mediation">
 
 export const LastDitch = {
     tag: "LastDitch",
-    penalty: 0.25
+    penalty: 0.25,
 } as const satisfies Tagged<"LastDitch">
 
 export const Sharpshooter = {
     tag: "Sharpshooter",
-    accuracy: 0.9
+    accuracy: 0.9,
 } as const satisfies Tagged<"Sharpshooter">
 
 export const Reverse = {
-    tag: "Reverse"
+    tag: "Reverse",
 } as const satisfies Tagged<"Reverse">
 
 export const Run = {
     tag: "Run",
-    share: 0.2
+    share: 0.2,
 } as const satisfies Tagged<"Run">
 
 export const Donation = {
     tag: "Donation",
-    amount: 50
+    amount: 50,
 } as const satisfies Tagged<"Donation">
 
 export const Destroy = {
-    tag: "Destroy"
+    tag: "Destroy",
 } as const satisfies Tagged<"Destroy">
 
 export type Buff =

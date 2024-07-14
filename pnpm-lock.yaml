@@ -35,9 +35,6 @@ importers:
       '@dartagnan/api':
         specifier: workspace:*
         version: link:../api
-      typescript-fsm:
-        specifier: ^1.4.5
-        version: 1.4.5
       ws:
         specifier: ^8.18.0
         version: 8.18.0
@@ -777,9 +774,6 @@ packages:
     resolution: {integrity: sha512-/Ftmxd5Mq//a9yMonvmwENNUN65jOVTwhhBPQjEtNZutYT9YKyzydFGLyVM1nzhpLWahQSMamRc/RDBv5EapzA==}
     hasBin: true
 
-  typescript-fsm@1.4.5:
-    resolution: {integrity: sha512-NsFpTyPjgpU0Ci5LAnRYO29LkopdqEvAC3rCivde55hjWB3nvACLh66G5qLKj0hwKsvahftLd7gxZeZt6UiplA==}
-
   typescript@5.5.3:
     resolution: {integrity: sha512-/hreyEujaB0w76zKo6717l3L0o/qEUtRgdvUBvlkhoWeOVMjMuHNHk0BRBzikzuGDqNmPQbg5ifMEqsHLiIUcQ==}
     engines: {node: '>=14.17'}
@@ -1482,8 +1476,6 @@ snapshots:
       turbo-linux-arm64: 2.0.6
       turbo-windows-64: 2.0.6
       turbo-windows-arm64: 2.0.6
-
-  typescript-fsm@1.4.5: {}
 
   typescript@5.5.3: {}
 

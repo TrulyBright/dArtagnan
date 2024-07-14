@@ -1,14 +1,23 @@
-import { Buff, Insurance, type Card } from "@dartagnan/api/card"
-import { Drift, randomDrift } from "@dartagnan/api/drift"
-import { PlayerDrewCard, PlayerStatus, YourCard, type Event } from "@dartagnan/api/event"
+import { type Buff, type Card, Insurance } from "@dartagnan/api/card"
+import { type Drift, randomDrift } from "@dartagnan/api/drift"
+import {
+    type Event,
+    PlayerDrewCard,
+    PlayerStatus,
+    YourCard,
+} from "@dartagnan/api/event"
 import type { PlayerBase } from "@dartagnan/api/player"
+import { BuffResetLiteral } from "#card"
 import type { Game } from "#game"
 import { Listening } from "#listening"
-import { BuffResetLiteral } from "#card"
 
-const broadcastStatus = (target: Player, name: string, descriptor: PropertyDescriptor) => {
+const broadcastStatus = (
+    target: Player,
+    name: string,
+    descriptor: PropertyDescriptor,
+) => {
     const original = descriptor.value
-    descriptor.value = function (...args: any[]) {
+    descriptor.value = function (...args: unknown[]) {
         const result = original.apply(this, args)
         target.game?.broadcast(new PlayerStatus(target))
         return result
@@ -20,7 +29,7 @@ export class Player extends Listening<Event> implements PlayerBase {
     constructor(readonly index: number) {
         super()
     }
-    buff: PlayerBase['buff'] = BuffResetLiteral
+    buff: PlayerBase["buff"] = BuffResetLiteral
     seated = true
     balance = 200
     card: Card | null = null
@@ -49,8 +58,7 @@ export class Player extends Listening<Event> implements PlayerBase {
     @broadcastStatus
     unseat() {
         this.seated = false
-        if (this.buff.Insurance)
-            this.deposit(Insurance.payout)
+        if (this.buff.Insurance) this.deposit(Insurance.payout)
     }
     @broadcastStatus
     setBuff(b: Buff) {
@@ -93,9 +101,7 @@ export class Player extends Listening<Event> implements PlayerBase {
         this.balance -= actual
         return actual
     }
-
 }
 function randomCard(): Card | null {
     throw new Error("Function not implemented.")
 }
-

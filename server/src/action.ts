@@ -8,18 +8,13 @@ import type {
     StartGame,
     UserAction,
 } from "@dartagnan/api/action"
+import { Bulletproof, Curse, Robbery } from "@dartagnan/api/card"
 import type { Drift } from "@dartagnan/api/drift"
-import {
-    CardPlayed,
-    PlayerShot,
-    UserSpoke,
-} from "@dartagnan/api/event"
+import { CardPlayed, PlayerShot, UserSpoke } from "@dartagnan/api/event"
+import { dispatchCardStrategy, randomCard } from "#card"
+import { Game } from "#game"
 import { Player } from "#player"
 import type { User } from "#user"
-import { Game, FSMEvent } from "#game"
-import { State } from "@dartagnan/api/game"
-import { dispathCardStrategy, randomCard } from "#card"
-import { Bulletproof, Curse, Robbery } from "@dartagnan/api/card"
 
 type ActorByAction<A extends Action> = A extends UserAction ? User : Player
 
@@ -47,7 +42,7 @@ class CStartGame implements Cmd<StartGame> {
         if (a.room?.host !== a) return
         if (!a.room.startable) return
         if (a.room.game) return
-        const g = new Game(4)
+        const g = new Game()
         a.room.users.forEach((u, i) => {
             const p = new Player(i)
             g.addPlayer(p)
@@ -55,7 +50,7 @@ class CStartGame implements Cmd<StartGame> {
             u.associate(p)
         })
         a.room.game = g
-        g.dispatch(FSMEvent.NewRound)
+        g
     }
 }
 
@@ -64,7 +59,7 @@ class CShoot implements Cmd<Shoot> {
     constructor(readonly index: number) {}
     readonly isUserCmd = false
     exec(a: Player): void {
-        if (a.game?.getState() === State.Turn) return
+        if (a.game?.state === "Turn") return
         if (a.game?.currentPlayer !== a) return
         const target = a.game.players.at(this.index)
         if (!target) return
@@ -87,11 +82,7 @@ class CShoot implements Cmd<Shoot> {
             a.unsetBuff(Robbery)
             target.unseat()
         }
-        a.game.dispatch(
-            a.game.seated.length === 1
-            ? FSMEvent.EndRound
-            : FSMEvent.ToNextTurn
-        )
+        a.game.turnDone()
     }
 }
 
@@ -99,10 +90,10 @@ class CDrawCard implements Cmd<DrawCard> {
     readonly isUserCmd = false
     readonly tag = "DrawCard"
     exec(a: Player): void {
-        if (a.game?.getState() !== State.Turn) return
+        if (a.game?.state !== "Turn") return
         if (a !== a.game.currentPlayer) return
         a.getCard(randomCard())
-        a.game.dispatch(FSMEvent.ToNextTurn)
+        a.game.turnDone()
     }
 }
 
@@ -110,13 +101,13 @@ class CPlayCard implements Cmd<PlayCard> {
     readonly isUserCmd = false
     readonly tag = "PlayCard"
     exec(a: Player): void {
-        if (a.game?.getState() !== State.Turn) return
+        if (a.game?.state !== "Turn") return
         if (a !== a.game.currentPlayer) return
         if (!a.card) return
         const played = a.card
         a.loseCard()
         a.game.broadcast(new CardPlayed(played))
-        const f = dispathCardStrategy(played)
+        const f = dispatchCardStrategy(played)
         f(a)
     }
 }
