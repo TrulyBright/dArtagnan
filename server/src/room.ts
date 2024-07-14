@@ -1,16 +1,20 @@
 import type { Code } from "@dartagnan/api/code"
 import type { Event } from "@dartagnan/api/event"
 import type { RoomBase } from "@dartagnan/api/room"
-import type { Game } from "#game"
+import { Game } from "#game"
+import { Player } from "#player"
 import type { User } from "#user"
 
 export class Room implements RoomBase {
     readonly users: User[] = []
     host: User | null = null
-    game: Game | null = null
+    private game: Game | null = null
     constructor(public code: Code) {}
+    get playing() {
+        return this.game !== null
+    }
     get startable() {
-        return this.game === null && this.users.length >= 3
+        return !this.playing && this.users.length >= 3
     }
     get empty() {
         return this.users.length === 0
@@ -34,5 +38,15 @@ export class Room implements RoomBase {
             // should never happen
             throw new Error("User not in room")
         this.users.splice(index, 1)
+    }
+    startGame() {
+        const g = new Game()
+        this.users.forEach((u, i) => {
+            const p = new Player(i)
+            g.addPlayer(p)
+            p.join(g)
+            u.associate(p)
+        })
+        this.game = g
     }
 }

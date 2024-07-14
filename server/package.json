@@ -5,6 +5,7 @@
 		"dev": "npx swc --watch",
 		"build": "npx swc ./src -d ./dist",
 		"clean": "rm -rf dist",
+		"test": "vitest",
 		"check-types": "tsc",
 		"format-lint": "biome check src",
 		"format-lint:fix": "biome check src --write"
@@ -20,9 +21,11 @@
 		"@swc/jest": "latest",
 		"@types/ws": "^8.5.10",
 		"chokidar": "latest",
-		"typescript": "latest"
+		"typescript": "latest",
+		"vitest": "^2.0.2"
 	},
 	"imports": {
-		"#*": "./src/*.ts"
+		"#*": "./src/*.ts",
+		"#test/*": "./test/*.ts"
 	}
 }

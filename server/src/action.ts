@@ -13,7 +13,7 @@ import type { Drift } from "@dartagnan/api/drift"
 import { CardPlayed, PlayerShot, UserSpoke } from "@dartagnan/api/event"
 import { dispatchCardStrategy, randomCard } from "#card"
 import { Game } from "#game"
-import { Player } from "#player"
+import type { Player } from "#player"
 import type { User } from "#user"
 
 type ActorByAction<A extends Action> = A extends UserAction ? User : Player
@@ -41,16 +41,7 @@ class CStartGame implements Cmd<StartGame> {
     exec(a: User): void {
         if (a.room?.host !== a) return
         if (!a.room.startable) return
-        if (a.room.game) return
-        const g = new Game()
-        a.room.users.forEach((u, i) => {
-            const p = new Player(i)
-            g.addPlayer(p)
-            p.join(g)
-            u.associate(p)
-        })
-        a.room.game = g
-        g
+        a.room.startGame()
     }
 }
 

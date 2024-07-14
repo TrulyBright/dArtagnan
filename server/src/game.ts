@@ -14,6 +14,18 @@ import {
 import type { GameBase, State } from "@dartagnan/api/game"
 import type { Player } from "#player"
 
+const enterState =
+    (s: State) =>
+    (target: Game, name: string, descriptor: PropertyDescriptor) => {
+        const original = descriptor.value
+        descriptor.value = function (this: Game, ...args: unknown[]) {
+            this.state = s
+            this.clearCountdown()
+            return original.apply(this, args)
+        }
+        return descriptor
+    }
+
 export class Game implements GameBase {
     private static readonly timeQuantum = 1000
     private static readonly timeLimit = Game.timeQuantum * 15
@@ -131,15 +143,3 @@ export class Game implements GameBase {
         if (this.countdown) clearInterval(this.countdown)
     }
 }
-
-const enterState =
-    (s: State) =>
-    (target: Game, name: string, descriptor: PropertyDescriptor) => {
-        const original = descriptor.value
-        descriptor.value = function (this: Game, ...args: unknown[]) {
-            this.state = s
-            this.clearCountdown()
-            return original.apply(this, args)
-        }
-        return descriptor
-    }
