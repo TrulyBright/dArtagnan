@@ -8,23 +8,18 @@ import type {
     StartGame,
     UserAction,
 } from "@dartagnan/api/action"
-import { CARD_CONSTS, randomCard } from "@dartagnan/api/card"
 import type { Drift } from "@dartagnan/api/drift"
 import {
     CardPlayed,
-    PlayerDrewCard,
     PlayerShot,
-    PlayerStatus,
-    Stakes,
-    TurnOrder,
     UserSpoke,
-    YourCard,
 } from "@dartagnan/api/event"
 import { Player } from "#player"
 import type { User } from "#user"
 import { Game, FSMEvent } from "#game"
 import { State } from "@dartagnan/api/game"
-import { dispathCardStrategy } from "#card"
+import { dispathCardStrategy, randomCard } from "#card"
+import { Bulletproof, Curse, Robbery } from "@dartagnan/api/card"
 
 type ActorByAction<A extends Action> = A extends UserAction ? User : Player
 
@@ -73,30 +68,24 @@ class CShoot implements Cmd<Shoot> {
         if (a.game?.currentPlayer !== a) return
         const target = a.game.players.at(this.index)
         if (!target) return
+        if (target === a) return
         a.game.broadcast(new PlayerShot(a, target))
         if (a.buff.Curse) {
-            a.buff.Curse = false
-            a.game.broadcast(new PlayerStatus(a))
-            target.accuracy = CARD_CONSTS.CURSE_ACCURACY
-            a.game.broadcast(new PlayerStatus(target))
+            a.unsetBuff(Curse)
+            target.setAccuracy(Curse.accuracy)
         }
         const success = Math.random() < a.accuracy
         if (!success) {
-        } // do nothing
-        else if (target.buff.Bulletproof) {
-            target.buff.Bulletproof = false
-            a.game.broadcast(new PlayerStatus(target))
+            // Do nothing
+        } else if (target.buff.Bulletproof) {
+            target.unsetBuff(Bulletproof)
         } else {
             const loot = a.buff.Robbery
-                ? a.game.bet * CARD_CONSTS.ROBBERY_MULTIPLIER
+                ? a.game.bet * Robbery.multiplier
                 : a.game.bet
             a.deposit(target.withdraw(loot))
-            a.buff.Robbery = false
-            target.seated = false
-            if (target.buff.Insurance)
-                target.deposit(CARD_CONSTS.INSURANCE_PAYOUT)
-            a.game.broadcast(new PlayerStatus(a))
-            a.game.broadcast(new PlayerStatus(target))
+            a.unsetBuff(Robbery)
+            target.unseat()
         }
         a.game.dispatch(
             a.game.seated.length === 1
@@ -112,9 +101,7 @@ class CDrawCard implements Cmd<DrawCard> {
     exec(a: Player): void {
         if (a.game?.getState() !== State.Turn) return
         if (a !== a.game.currentPlayer) return
-        a.card = randomCard()
-        a.recv(new YourCard(a.card))
-        a.game.broadcast(new PlayerDrewCard(a))
+        a.getCard(randomCard())
         a.game.dispatch(FSMEvent.ToNextTurn)
     }
 }
@@ -127,7 +114,7 @@ class CPlayCard implements Cmd<PlayCard> {
         if (a !== a.game.currentPlayer) return
         if (!a.card) return
         const played = a.card
-        a.card = null
+        a.loseCard()
         a.game.broadcast(new CardPlayed(played))
         const f = dispathCardStrategy(played)
         f(a)
@@ -139,8 +126,7 @@ class CSetDrift implements Cmd<SetDrift> {
     constructor(readonly drift: Drift) {}
     readonly isUserCmd = false
     exec(a: Player): void {
-        a.drift = this.drift
-        a.game?.broadcast(new PlayerStatus(a))
+        a.setDrift(this.drift)
     }
 }
 

@@ -1,9 +1,10 @@
-import { Buff, BuffStatusReset, randomCard, type Card } from "@dartagnan/api/card"
+import { Buff, Insurance, type Card } from "@dartagnan/api/card"
 import { Drift, randomDrift } from "@dartagnan/api/drift"
-import { PlayerStatus, type Event } from "@dartagnan/api/event"
+import { PlayerDrewCard, PlayerStatus, YourCard, type Event } from "@dartagnan/api/event"
 import type { PlayerBase } from "@dartagnan/api/player"
 import type { Game } from "#game"
 import { Listening } from "#listening"
+import { BuffResetLiteral } from "#card"
 
 const broadcastStatus = (target: Player, name: string, descriptor: PropertyDescriptor) => {
     const original = descriptor.value
@@ -19,7 +20,7 @@ export class Player extends Listening<Event> implements PlayerBase {
     constructor(readonly index: number) {
         super()
     }
-    buff: PlayerBase['buff'] = BuffStatusReset
+    buff: PlayerBase['buff'] = BuffResetLiteral
     seated = true
     balance = 200
     card: Card | null = null
@@ -36,21 +37,28 @@ export class Player extends Listening<Event> implements PlayerBase {
     setAccuracy(a: number) {
         this.accuracy = a
     }
-    @broadcastStatus
-    getCard(c: Card | null) {
+    getCard(c: Card) {
         this.card = c
+        this.recv(new YourCard(c))
+        this.game?.broadcast(new PlayerDrewCard(this))
+    }
+    loseCard() {
+        this.card = null
+        this.recv(new YourCard(null))
     }
     @broadcastStatus
     unseat() {
         this.seated = false
+        if (this.buff.Insurance)
+            this.deposit(Insurance.payout)
     }
     @broadcastStatus
-    setBuff(b: Buff['tag']) {
-        this.buff = b
+    setBuff(b: Buff) {
+        this.buff[b.tag] = true
     }
     @broadcastStatus
-    unsetBuff() {
-        this.buff = BuffStatusReset
+    unsetBuff(b: Buff) {
+        this.buff[b.tag] = false
     }
     join(g: Game) {
         this.game = g
@@ -63,7 +71,7 @@ export class Player extends Listening<Event> implements PlayerBase {
         this.accuracy = Math.random()
         this.drift = randomDrift()
         this.card = randomCard()
-        this.buff = BuffStatusReset
+        this.buff = BuffResetLiteral
     }
     /**
      * @returns the balance after the deposit.
@@ -87,3 +95,7 @@ export class Player extends Listening<Event> implements PlayerBase {
     }
 
 }
+function randomCard(): Card | null {
+    throw new Error("Function not implemented.")
+}
+

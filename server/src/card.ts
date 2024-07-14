@@ -1,11 +1,11 @@
 import { Player } from "#player"
-import { Bulletproof, Card, Insurance } from "@dartagnan/api/card"
+import { Buff, Bulletproof, Card, Curse, Destroy, Donation, Insurance, LastDitch, Mediation, Reverse, Robbery, Run, Sharpshooter } from "@dartagnan/api/card"
 
 type CardStrategy = (p: Player) => void
 
 const SInsurance: CardStrategy = (p: Player) => {
     p.withdraw(Insurance.payout)
-    p.setBuff(Insurance.tag)
+    p.setBuff(Insurance)
     if (p.bankrupt) {
         p.unseat()
         // TODO: to next turn
@@ -14,7 +14,7 @@ const SInsurance: CardStrategy = (p: Player) => {
 
 const SBulletproof: CardStrategy = (p: Player) => {
     p.withdraw(Bulletproof.cost)
-    p.setBuff(Bulletproof.tag)
+    p.setBuff(Bulletproof)
     if (p.bankrupt) {
         p.unseat()
         // TODO: to next turn
@@ -22,20 +22,20 @@ const SBulletproof: CardStrategy = (p: Player) => {
 }
 
 const SCurse: CardStrategy = (p: Player) => {
-    p.setBuff(Curse.tag)
+    p.setBuff(Curse)
 }
 
 const SRobbery: CardStrategy = (p: Player) => {
-    p.setBuff(Robbery.tag)
+    p.setBuff(Robbery)
 }
 
 const SMediation: CardStrategy = (p: Player) => {
-    p.setBuff(Mediation.tag)
+    p.setBuff(Mediation)
 }
 
 const SLastDitch: CardStrategy = (p: Player) => {
     p.setAccuracy(p.accuracy - LastDitch.penalty)
-    p.setBuff(LastDitch.tag)
+    p.setBuff(LastDitch)
 }
 
 const SSharpshooter: CardStrategy = (p: Player) => {
@@ -62,7 +62,7 @@ const SDonation: CardStrategy = (p: Player) => {
 const SDestroy: CardStrategy = (p: Player) => {
     if (!p.game) return
     for (const s of p.game.seated) {
-        s.getCard(null)
+        s.loseCard()
     }
 }
 
@@ -91,4 +91,35 @@ export const dispathCardStrategy = (c: Card): CardStrategy => {
         case "Destroy":
             return SDestroy
     }
+}
+
+/**
+ * add the same card multiple times to increase the chance of drawing it.
+ * @readonly
+ */
+const cardPool = [
+    Insurance,
+    Bulletproof,
+    Curse,
+    Robbery,
+    Mediation,
+    LastDitch,
+    Sharpshooter,
+    Reverse,
+    Run,
+    Donation,
+    Destroy
+] as const
+
+export const randomCard = (): Card => {
+    return cardPool[Math.floor(Math.random() * cardPool.length)]
+}
+
+export const BuffResetLiteral: Record<Buff['tag'], false> = {
+    Insurance: false,
+    Bulletproof: false,
+    Curse: false,
+    Robbery: false,
+    Mediation: false,
+    LastDitch: false
 }
