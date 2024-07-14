@@ -7,6 +7,7 @@
 		"clean": "turbo run clean"
 	},
 	"devDependencies": {
+		"lefthook": "^1.7.2",
 		"turbo": "latest"
 	},
 	"packageManager": "pnpm@9.5.0"

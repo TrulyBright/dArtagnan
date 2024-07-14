@@ -5,7 +5,8 @@
 		"dev": "npx swc --watch",
 		"build": "npx swc ./src -d ./dist",
 		"clean": "rm -rf dist",
-		"test": "vitest",
+		"test": "vitest run",
+		"test:watch": "vitest watch",
 		"check-types": "tsc",
 		"format-lint": "biome check src",
 		"format-lint:fix": "biome check src --write"
