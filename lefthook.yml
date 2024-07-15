@@ -1,14 +1,15 @@
 pre-push:
+  parallel: true
   commands:
     packages-audit:
       run: pnpm audit
+    check-types:
+      run: turbo check-types
+    test:
+      run: turbo test
 
 pre-commit:
   parallel: true
   commands:
-    check-types:
-      run: turbo check-types
     format-and-lint:
       run: turbo format-lint:fix
-    test:
-      run: turbo test
