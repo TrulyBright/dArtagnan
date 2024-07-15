@@ -9,6 +9,11 @@ export type StartGame = {
     readonly tag: "StartGame"
 }
 
+export type SetBet = {
+    readonly tag: "SetBet"
+    readonly amount: number
+}
+
 export type Shoot = {
     readonly tag: "Shoot"
     readonly index: number
@@ -28,5 +33,5 @@ export type SetDrift = {
 }
 
 export type UserAction = Speak | StartGame
-export type PlayerAction = Shoot | DrawCard | PlayCard | SetDrift
+export type PlayerAction = SetBet | Shoot | DrawCard | PlayCard | SetDrift
 export type Action = UserAction | PlayerAction

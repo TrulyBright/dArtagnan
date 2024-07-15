@@ -2,6 +2,7 @@ import type {
     Action,
     DrawCard,
     PlayCard,
+    SetBet,
     SetDrift,
     Shoot,
     Speak,
@@ -42,6 +43,17 @@ class CStartGame implements Cmd<StartGame> {
         if (a.room?.host !== a) return
         if (!a.room.startable) return
         a.room.startGame()
+    }
+}
+
+class CSetBet implements Cmd<SetBet> {
+    readonly isUserCmd = false
+    readonly tag = "SetBet"
+    constructor(readonly amount: number) {}
+    exec(a: Player): void {
+        if (a.game?.state !== "BetSetup") return
+        if (a.game.currentPlayer !== a) return
+        // TODO
     }
 }
 
@@ -118,6 +130,8 @@ export const dispatchCmd = <T extends Action>(a: T) => {
             return new CSpeak(a.message)
         case "StartGame":
             return new CStartGame()
+        case "SetBet":
+            return new CSetBet(a.amount)
         case "Shoot":
             return new CShoot(a.index)
         case "DrawCard":
