@@ -27,6 +27,7 @@ const enterState =
     }
 
 export class Game implements GameBase {
+    static readonly MIN_PLAYERS = 3
     private static readonly timeQuantum = 1000
     private static readonly timeLimit = Game.timeQuantum * 15
     private readonly _players: Player[] = []
@@ -91,8 +92,7 @@ export class Game implements GameBase {
     turnDone() {
         if (this.state !== "Turn") return
         if (this.currentPlayer === null) throw new Error("No current player")
-        if (this.seated.length !== 1)
-            this.enterTurn(this.whoPlaysNext)
+        if (this.seated.length !== 1) this.enterTurn(this.whoPlaysNext)
         else if (this.round === this.maxRound) this.enterRoundCeremony()
         else this.enterRoundInit(this.round + 1)
     }
