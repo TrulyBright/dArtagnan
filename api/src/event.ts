@@ -14,6 +14,14 @@ export class UserEntered {
     constructor(readonly user: UserBase) {}
 }
 
+export class NewHost {
+    constructor(readonly host: UserBase) {}
+}
+
+export class UserLeft {
+    constructor(readonly user: UserBase) {}
+}
+
 export class NowTurnOf {
     constructor(readonly player: PlayerBase) {}
 }
@@ -74,7 +82,7 @@ export class Stakes {
     constructor(readonly stakes: number) {}
 }
 
-const userEvents = [UserSpoke, UserEntered] as const
+const userEvents = [UserSpoke, UserEntered, UserLeft, NewHost] as const
 
 const playerEvents = [
     NewRound,

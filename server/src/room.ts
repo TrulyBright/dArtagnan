@@ -1,5 +1,5 @@
 import type { Code } from "@dartagnan/api/code"
-import type { Event } from "@dartagnan/api/event"
+import { UserEntered, type Event, UserLeft, NewHost } from "@dartagnan/api/event"
 import type { RoomBase } from "@dartagnan/api/room"
 import { Game } from "#game"
 import { Player } from "#player"
@@ -28,10 +28,11 @@ export class Room implements RoomBase {
     }
     setHost(u: User) {
         this.host = u
+        this.broadcast(new NewHost(u))
     }
     addUser(u: User) {
         this.users.push(u)
-        if (!this.host) this.setHost(u)
+        this.broadcast(new UserEntered(u))
     }
     removeUser(u: User) {
         const index = this.users.indexOf(u)
@@ -39,6 +40,7 @@ export class Room implements RoomBase {
             // should never happen
             throw new Error("User not in room")
         this.users.splice(index, 1)
+        this.broadcast(new UserLeft(u))
     }
     startGame() {
         const g = new Game()
