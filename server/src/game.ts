@@ -49,9 +49,11 @@ export class Game implements GameBase {
     get seated(): readonly Player[] {
         return this.players.filter(p => p.seated)
     }
-    whoPlaysNext(p: Player) {
-        if (p.buff.LastDitch) return p
-        const i = this.seated.indexOf(p)
+    get whoPlaysNext() {
+        if (!this.currentPlayer) throw new Error("currentPlayer not set")
+        if (this.state === "BetSetup") return this.currentPlayer
+        if (this.currentPlayer.buff.LastDitch) return this.currentPlayer
+        const i = this.seated.indexOf(this.currentPlayer)
         return this.seated[(i + this.turnOrder) % this.seated.length]
     }
     broadcast<E extends Event>(e: E) {
@@ -90,7 +92,7 @@ export class Game implements GameBase {
         if (this.state !== "Turn") return
         if (this.currentPlayer === null) throw new Error("No current player")
         if (this.seated.length !== 1)
-            this.enterTurn(this.whoPlaysNext(this.currentPlayer))
+            this.enterTurn(this.whoPlaysNext)
         else if (this.round === this.maxRound) this.enterRoundCeremony()
         else this.enterRoundInit(this.round + 1)
     }
