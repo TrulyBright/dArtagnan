@@ -13,7 +13,6 @@ import { Bulletproof, Curse, Robbery } from "@dartagnan/api/card"
 import type { Drift } from "@dartagnan/api/drift"
 import { CardPlayed, PlayerShot, UserSpoke } from "@dartagnan/api/event"
 import { dispatchCardStrategy, randomCard } from "#card"
-import { Game } from "#game"
 import type { Player } from "#player"
 import type { User } from "#user"
 
@@ -27,11 +26,13 @@ type Cmd<A extends Action> = {
 class CSpeak implements Cmd<Speak> {
     readonly tag = "Speak"
     constructor(readonly message: string) {
-        this.message = this.message.slice(80).trim()
+        this.message = this.message.slice(0, 80).trim()
     }
     readonly isUserCmd = true
     exec(a: User): void {
+        console.log(1234)
         if (!this.message) return
+        console.log(5678)
         a.room?.broadcast(new UserSpoke(this.message, a))
     }
 }
