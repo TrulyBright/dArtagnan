@@ -30,9 +30,7 @@ class CSpeak implements Cmd<Speak> {
     }
     readonly isUserCmd = true
     exec(a: User): void {
-        console.log(1234)
         if (!this.message) return
-        console.log(5678)
         a.room?.broadcast(new UserSpoke(this.message, a))
     }
 }

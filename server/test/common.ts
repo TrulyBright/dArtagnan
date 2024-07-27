@@ -20,4 +20,5 @@ class Queue<T> {
         return popped
     }
     get length() { return this.items.length }
+    get empty() { return this.items.length === 0 }
 }

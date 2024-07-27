@@ -1,5 +1,10 @@
 import type { Code } from "@dartagnan/api/code"
-import { UserEntered, type Event, UserLeft, NewHost } from "@dartagnan/api/event"
+import {
+    type Event,
+    NewHost,
+    UserEntered,
+    UserLeft,
+} from "@dartagnan/api/event"
 import type { RoomBase } from "@dartagnan/api/room"
 import { Game } from "#game"
 import { Player } from "#player"
