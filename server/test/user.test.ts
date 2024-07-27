@@ -5,21 +5,12 @@ import { Room } from "#room"
 import { NewHost, UserEntered, UserLeft, UserSpoke } from "@dartagnan/api/event"
 import { dispatchCmd } from "#action"
 import { NeedToBeHost, NoSuchRoom, RoomFull, Unstartable } from "@dartagnan/api/error"
-import { User } from "#user"
-import { isUsername, Username } from "@dartagnan/api/user"
+import { uGen } from "#test/common"
 
 let H: Hub
 beforeEach(() => {
     H = new Hub()
 })
-
-const unameGen = (): Username => {
-    const s = Math.floor(Math.random() * 100).toString(36)
-    if (isUsername(s)) return s
-    throw new Error(`Invalid Username: ${s}`)
-}
-
-const uGen = () => new User(unameGen())
 
 test("User creates, enters, speaks in, and leaves a room", () => {
     // Create
