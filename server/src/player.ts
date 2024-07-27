@@ -1,15 +1,10 @@
 import { type Buff, type Card, Insurance } from "@dartagnan/api/card"
 import { type Drift, randomDrift } from "@dartagnan/api/drift"
-import {
-    type Event,
-    PlayerDrewCard,
-    PlayerStatus,
-    YourCard,
-} from "@dartagnan/api/event"
+import { PlayerDrewCard, PlayerStatus, YourCard } from "@dartagnan/api/event"
 import type { PlayerBase } from "@dartagnan/api/player"
-import { BuffResetLiteral } from "#card"
+import { BuffResetLiteral, randomCard } from "#card"
 import type { Game } from "#game"
-import { Listening } from "#listening"
+import { EnqueueOnEvent } from "#queue"
 
 const broadcastStatus = (
     target: Player,
@@ -24,10 +19,11 @@ const broadcastStatus = (
     }
 }
 
-export class Player extends Listening<Event> implements PlayerBase {
+export class Player extends EnqueueOnEvent implements PlayerBase {
     game: Game | null = null
     constructor(readonly index: number) {
         super()
+        this.addListener(this.EventQ.push.bind(this.EventQ))
     }
     buff: PlayerBase["buff"] = BuffResetLiteral
     seated = true
@@ -101,7 +97,4 @@ export class Player extends Listening<Event> implements PlayerBase {
         this.balance -= actual
         return actual
     }
-}
-function randomCard(): Card | null {
-    throw new Error("Function not implemented.")
 }
