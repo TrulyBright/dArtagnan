@@ -12,6 +12,7 @@ import {
     TurnOrder,
 } from "@dartagnan/api/event"
 import type { GameBase, State } from "@dartagnan/api/game"
+import type { Listener } from "#listening"
 import type { Player } from "#player"
 
 const enterState =
@@ -30,6 +31,7 @@ export class Game implements GameBase {
     static readonly MIN_PLAYERS = 3
     private static readonly timeQuantum = 1000
     private static readonly timeLimit = Game.timeQuantum * 15
+    private broadcasters: Listener<Event>[] = []
     private readonly _players: Player[] = []
     get players(): readonly Player[] {
         return this._players
@@ -57,8 +59,14 @@ export class Game implements GameBase {
         const i = this.seated.indexOf(this.currentPlayer)
         return this.seated[(i + this.turnOrder) % this.seated.length]
     }
+    addbroadcaster(l: Listener<Event>) {
+        this.broadcasters.push(l)
+    }
+    /**
+     * Call broadcasters with `e` for their argument.
+     */
     broadcast<E extends Event>(e: E) {
-        for (const p of this.players) p.recv(e)
+        for (const l of this.broadcasters) l(e)
     }
     addPlayer(p: Player) {
         if (this.state !== "Idle") return

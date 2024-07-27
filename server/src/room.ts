@@ -56,5 +56,8 @@ export class Room implements RoomBase {
             u.associate(p)
         })
         this.game = g
+        // The game will broadcast events to everyone in the room
+        // so that spectators can also observe them.
+        g.addbroadcaster(this.broadcast.bind(this))
     }
 }

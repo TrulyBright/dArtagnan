@@ -24,15 +24,15 @@ export class Queue<Item> {
 export abstract class EnqueueOnEvent extends Listening<Event> {
     protected static readonly Qsize = 10
     protected EventQ = new Queue<Event>(EnqueueOnEvent.Qsize)
+    constructor() {
+        super()
+        this.addListener(this.EventQ.push.bind(this.EventQ))
+    }
     /** return the earliest of the last `Q_CAPACITY` events. */
     get earliestEvent() {
         return this.EventQ.pop()
     }
     get gotNoEvent() {
         return this.earliestEvent === undefined
-    }
-    constructor() {
-        super()
-        this.addListener(this.EventQ.push.bind(this.EventQ))
     }
 }

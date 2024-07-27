@@ -23,7 +23,6 @@ export class Player extends EnqueueOnEvent implements PlayerBase {
     game: Game | null = null
     constructor(readonly index: number) {
         super()
-        this.addListener(this.EventQ.push.bind(this.EventQ))
     }
     buff: PlayerBase["buff"] = BuffResetLiteral
     seated = true

@@ -102,8 +102,8 @@ const playerEvents = [
 
 const events = [...userEvents, ...playerEvents] as const
 
-type UserEvent = InstanceType<(typeof userEvents)[number]>
+export type UserEvent = InstanceType<(typeof userEvents)[number]>
 
-type PlayerEvent = InstanceType<(typeof playerEvents)[number]>
+export type PlayerEvent = InstanceType<(typeof playerEvents)[number]>
 
 export type Event = UserEvent | PlayerEvent
