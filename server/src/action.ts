@@ -11,6 +11,7 @@ import type {
 } from "@dartagnan/api/action"
 import { Bulletproof, Curse, Robbery } from "@dartagnan/api/card"
 import type { Drift } from "@dartagnan/api/drift"
+import { NeedToBeHost, Unstartable } from "@dartagnan/api/error"
 import { CardPlayed, PlayerShot, UserSpoke } from "@dartagnan/api/event"
 import { dispatchCardStrategy, randomCard } from "#card"
 import type { Player } from "#player"
@@ -39,8 +40,8 @@ class CStartGame implements Cmd<StartGame> {
     readonly isUserCmd = true
     readonly tag = "StartGame"
     exec(a: User): void {
-        if (a.room?.host !== a) return
-        if (!a.room.startable) return
+        if (a.room?.host !== a) throw new NeedToBeHost()
+        if (!a.room.startable) throw new Unstartable()
         a.room.startGame()
     }
 }
