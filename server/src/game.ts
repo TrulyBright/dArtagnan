@@ -15,6 +15,7 @@ import type { GameBase, State } from "@dartagnan/api/game"
 import type { Listener } from "#listening"
 import type { Player } from "#player"
 
+/** This does not broadcast the state. */
 const enterState =
     (s: State) =>
     (target: Game, name: string, descriptor: PropertyDescriptor) => {
@@ -29,8 +30,8 @@ const enterState =
 
 export class Game implements GameBase {
     static readonly MIN_PLAYERS = 3
-    private static readonly timeQuantum = 1000
-    private static readonly timeLimit = Game.timeQuantum * 15
+    static readonly timeQuantum = 1000
+    static readonly timeLimit = Game.timeQuantum * 15
     private broadcasters: Listener<Event>[] = []
     private readonly _players: Player[] = []
     get players(): readonly Player[] {
