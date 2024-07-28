@@ -12,16 +12,19 @@ const broadcastStatus = (
     descriptor: PropertyDescriptor,
 ) => {
     const original = descriptor.value
-    descriptor.value = function (...args: unknown[]) {
+    descriptor.value = function (this: Player, ...args: unknown[]) {
         const result = original.apply(this, args)
-        target.game?.broadcast(new PlayerStatus(target))
+        this.game.broadcast(new PlayerStatus(this))
         return result
     }
+    return descriptor
 }
 
 export class Player extends EnqueueOnEvent implements PlayerBase {
-    game: Game | null = null
-    constructor(readonly index: number) {
+    constructor(
+        readonly index: number,
+        readonly game: Game,
+    ) {
         super()
     }
     buff: PlayerBase["buff"] = BuffResetLiteral
@@ -31,7 +34,7 @@ export class Player extends EnqueueOnEvent implements PlayerBase {
     accuracy = Math.random()
     drift = randomDrift()
     get bankrupt() {
-        return this.balance === 0
+        return this.balance <= 0
     }
     @broadcastStatus
     setDrift(d: Drift) {
@@ -44,7 +47,7 @@ export class Player extends EnqueueOnEvent implements PlayerBase {
     getCard(c: Card) {
         this.card = c
         this.recv(new YourCard(c))
-        this.game?.broadcast(new PlayerDrewCard(this))
+        this.game.broadcast(new PlayerDrewCard(this))
     }
     loseCard() {
         this.card = null
@@ -62,9 +65,6 @@ export class Player extends EnqueueOnEvent implements PlayerBase {
     @broadcastStatus
     unsetBuff(b: Buff) {
         this.buff[b.tag] = false
-    }
-    join(g: Game) {
-        this.game = g
     }
     /** Keep the balance. */
     @broadcastStatus

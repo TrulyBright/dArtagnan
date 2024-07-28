@@ -50,9 +50,8 @@ export class Room implements RoomBase {
     startGame() {
         const g = new Game()
         this.users.forEach((u, i) => {
-            const p = new Player(i)
+            const p = new Player(i, g)
             g.addPlayer(p)
-            p.join(g)
             u.associate(p)
         })
         this.game = g
