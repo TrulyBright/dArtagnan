@@ -1,17 +1,28 @@
-import { LastDitch } from "@dartagnan/api/card"
+import {
+    Bulletproof,
+    type Card,
+    Curse,
+    LastDitch,
+    Robbery,
+} from "@dartagnan/api/card"
 import {
     BetSetupDone,
     BetSetupStart,
+    CardPlayed,
     Countdown,
     type Event,
     GameOver,
     NewRound,
     NowTurnOf,
+    PlayerShot,
     RoundWinner,
     Stakes,
     TurnOrder,
 } from "@dartagnan/api/event"
 import type { GameBase, State } from "@dartagnan/api/game"
+import { a } from "vitest/dist/suite-BWgaIsVn.js"
+import { dispatchCmd } from "#action"
+import { dispatchCardStrategy, randomCard } from "#card"
 import type { Listener } from "#listening"
 import type { Player } from "#player"
 
@@ -45,6 +56,12 @@ export class Game implements GameBase {
     round = 0
     readonly maxRound = 4
     bet = 10
+    get betWindow(): readonly [number, number] {
+        return [5 * this.round, 5 * this.round + 10]
+    }
+    get defaultBetAmount() {
+        return Math.floor((this.betWindow[0] + this.betWindow[1]) / 2)
+    }
     stakes = 0
     currentPlayer: Player | null = null
     private lastWinner: Player | null = null
@@ -59,6 +76,12 @@ export class Game implements GameBase {
         if (this.currentPlayer.buff.LastDitch) return this.currentPlayer
         const i = this.seated.indexOf(this.currentPlayer)
         return this.seated[(i + this.turnOrder) % this.seated.length]
+    }
+    randomSeated(except: Player | null): Player {
+        const pool = this.seated.filter(p => p !== except)
+        const picked = pool.at(Math.random() * pool.length)
+        if (!picked) throw new Error("No other seated player")
+        return picked
     }
     addbroadcaster(l: Listener<Event>) {
         this.broadcasters.push(l)
@@ -105,6 +128,37 @@ export class Game implements GameBase {
         else if (this.round === this.maxRound) this.enterRoundCeremony()
         else this.enterRoundInit(this.round + 1)
     }
+    shoot(shooter: Player, target: Player) {
+        this.broadcast(new PlayerShot(shooter, target))
+        if (shooter.buff.Curse) {
+            shooter.unsetBuff(Curse)
+            target.setAccuracy(Curse.accuracy)
+        }
+        const success = Math.random() < shooter.accuracy
+        if (!success) {
+            // Do nothing
+        } else if (target.buff.Bulletproof) {
+            target.unsetBuff(Bulletproof)
+        } else {
+            const loot = shooter.buff.Robbery
+                ? this.bet * Robbery.multiplier
+                : this.bet
+            shooter.deposit(target.withdraw(loot))
+            shooter.unsetBuff(Robbery)
+            target.unseat()
+        }
+        this.turnDone()
+    }
+    drawCard(drawing: Player) {
+        drawing.getCard(randomCard())
+        drawing.game.turnDone()
+    }
+    playCard(playing: Player) {
+        const played = playing.card as Card
+        playing.loseCard()
+        this.broadcast(new CardPlayed(played))
+        dispatchCardStrategy(played)(playing)
+    }
     @enterState("Turn")
     private enterTurn(p: Player) {
         this.currentPlayer = p
@@ -114,7 +168,10 @@ export class Game implements GameBase {
             this.broadcast(new Countdown(Game.timeLimit, this.timeRemaining))
             if (this.timeRemaining <= 0) {
                 this.clearCountdown()
-                this.turnDone()
+                dispatchCmd({
+                    tag: "Shoot",
+                    index: this.randomSeated(this.currentPlayer).index,
+                }).exec(p)
             } else this.timeRemaining -= Game.timeQuantum
         }, Game.timeQuantum)
     }
@@ -134,7 +191,7 @@ export class Game implements GameBase {
         this.broadcast(new BetSetupStart(this.currentPlayer))
         this.countdown = setInterval(() => {
             this.broadcast(new Countdown(Game.timeLimit, this.timeRemaining))
-            if (this.timeRemaining <= 0) this.setBet(10 * this.round)
+            if (this.timeRemaining <= 0) this.setBet(this.defaultBetAmount)
             else this.timeRemaining -= Game.timeQuantum
         }, Game.timeQuantum)
     }

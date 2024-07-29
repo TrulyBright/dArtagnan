@@ -53,7 +53,9 @@ class CSetBet implements Cmd<SetBet> {
     exec(a: Player): void {
         if (a.game?.state !== "BetSetup") return
         if (a.game.currentPlayer !== a) return
-        // TODO
+        if (this.amount < a.game.betWindow[0]) return
+        if (this.amount > a.game.betWindow[1]) return
+        a.game.setBet(this.amount)
     }
 }
 
@@ -67,25 +69,7 @@ class CShoot implements Cmd<Shoot> {
         const target = a.game.players.at(this.index)
         if (!target) return
         if (target === a) return
-        a.game.broadcast(new PlayerShot(a, target))
-        if (a.buff.Curse) {
-            a.unsetBuff(Curse)
-            target.setAccuracy(Curse.accuracy)
-        }
-        const success = Math.random() < a.accuracy
-        if (!success) {
-            // Do nothing
-        } else if (target.buff.Bulletproof) {
-            target.unsetBuff(Bulletproof)
-        } else {
-            const loot = a.buff.Robbery
-                ? a.game.bet * Robbery.multiplier
-                : a.game.bet
-            a.deposit(target.withdraw(loot))
-            a.unsetBuff(Robbery)
-            target.unseat()
-        }
-        a.game.turnDone()
+        a.game.shoot(a, target)
     }
 }
 
@@ -95,8 +79,7 @@ class CDrawCard implements Cmd<DrawCard> {
     exec(a: Player): void {
         if (a.game?.state !== "Turn") return
         if (a !== a.game.currentPlayer) return
-        a.getCard(randomCard())
-        a.game.turnDone()
+        a.game.drawCard(a)
     }
 }
 
@@ -107,11 +90,7 @@ class CPlayCard implements Cmd<PlayCard> {
         if (a.game?.state !== "Turn") return
         if (a !== a.game.currentPlayer) return
         if (!a.card) return
-        const played = a.card
-        a.loseCard()
-        a.game.broadcast(new CardPlayed(played))
-        const f = dispatchCardStrategy(played)
-        f(a)
+        a.game.playCard(a)
     }
 }
 
@@ -124,7 +103,23 @@ class CSetDrift implements Cmd<SetDrift> {
     }
 }
 
-export const dispatchCmd = <T extends Action>(a: T) => {
+type CmdByTag<A extends Action> = A["tag"] extends Speak["tag"]
+    ? CSpeak
+    : A["tag"] extends StartGame["tag"]
+      ? CStartGame
+      : A["tag"] extends SetBet["tag"]
+        ? CSetBet
+        : A["tag"] extends Shoot["tag"]
+          ? CShoot
+          : A["tag"] extends DrawCard["tag"]
+            ? CDrawCard
+            : A["tag"] extends PlayCard["tag"]
+              ? CPlayCard
+              : A["tag"] extends SetDrift["tag"]
+                ? CSetDrift
+                : never
+
+export const dispatchCmd = <T extends Action>(a: T): CmdByTag<T> => {
     switch (a.tag) {
         case "Speak":
             return new CSpeak(a.message)
