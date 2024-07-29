@@ -1,10 +1,4 @@
-import {
-    Bulletproof,
-    type Card,
-    Curse,
-    LastDitch,
-    Robbery,
-} from "@dartagnan/api/card"
+import { Bulletproof, Curse, LastDitch, Robbery } from "@dartagnan/api/card"
 import {
     BetSetupDone,
     BetSetupStart,
@@ -20,7 +14,6 @@ import {
     TurnOrder,
 } from "@dartagnan/api/event"
 import type { GameBase, State } from "@dartagnan/api/game"
-import { dispatchCmd } from "#action"
 import { dispatchCardStrategy, randomCard } from "#card"
 import type { Listener } from "#listening"
 import type { Player } from "#player"
@@ -32,16 +25,32 @@ const enterState =
         const original = descriptor.value
         descriptor.value = function (this: Game, ...args: unknown[]) {
             this.state = s
-            this.clearCountdown()
+            this.clearTimer()
+            return original.apply(this, args)
+        }
+        return descriptor
+    }
+
+const allowedIn =
+    (s: State[]) =>
+    (target: Game, name: string, descriptor: PropertyDescriptor) => {
+        const original = descriptor.value
+        descriptor.value = function (this: Game, ...args: unknown[]) {
+            if (!s.includes(this.state))
+                throw new Error(
+                    `you can't call ${name} in the state ${this.state}. It's allowed only in: ${s}`,
+                )
             return original.apply(this, args)
         }
         return descriptor
     }
 
 export class Game implements GameBase {
+    // TODO: offer speed-up mode to users. i.e., time values are configurable.
     static readonly MIN_PLAYERS = 3
     static readonly timeQuantum = 1000
     static readonly timeLimit = Game.timeQuantum * 15
+    static readonly ceremonyTimeLimit = Game.timeQuantum * 3
     private broadcasters: Listener<Event>[] = []
     private readonly _players: Player[] = []
     get players(): readonly Player[] {
@@ -65,7 +74,7 @@ export class Game implements GameBase {
     currentPlayer: Player | null = null
     private lastWinner: Player | null = null
     private timeRemaining = Game.timeLimit
-    private countdown: NodeJS.Timeout | null = null
+    private timer: NodeJS.Timeout | null = null
     get seated(): readonly Player[] {
         return this.players.filter(p => p.seated)
     }
@@ -91,42 +100,52 @@ export class Game implements GameBase {
     broadcast<E extends Event>(e: E) {
         for (const l of this.broadcasters) l(e)
     }
+    @allowedIn(["Idle"])
+    start() {
+        this.enterRoundInit(1)
+    }
+    @allowedIn(["Idle"])
     addPlayer(p: Player) {
         if (this.state !== "Idle") return
         this._players.push(p)
     }
+    @allowedIn(["Idle"])
     removePlayer(p: Player) {
         if (this.state !== "Idle") return
         const i = this.players.indexOf(p)
         if (i !== -1) this._players.splice(i, 1)
     }
-    reverseTurnOrder() {
-        this._turnOrder *= -1
-        this.broadcast(new TurnOrder(this.turnOrder))
-    }
-    setStakes(s: number) {
-        this.stakes = s
-        this.broadcast(new Stakes(s))
-    }
+    @allowedIn(["BetSetup"])
     /** Set the bet amount and proceed to the first turn. */
     setBet(amount: number) {
-        this.clearCountdown()
         if (!this.currentPlayer) throw new Error("No current player")
         this.bet = amount
         this.broadcast(new BetSetupDone(amount))
         this.enterTurn(this.currentPlayer)
     }
-    start() {
-        this.enterRoundInit(1)
+    @allowedIn(["Turn"])
+    reverseTurnOrder() {
+        this._turnOrder *= -1
+        this.broadcast(new TurnOrder(this.turnOrder))
+    }
+    @allowedIn(["RoundInit", "Turn"])
+    setStakes(s: number) {
+        this.stakes = s
+        this.broadcast(new Stakes(s))
     }
     /** Proceed to the next turn, next round, or game over, depending on the context. */
+    @allowedIn(["Turn"])
     turnDone() {
         if (this.state !== "Turn") return
         if (this.currentPlayer === null) throw new Error("No current player")
+        if (this.seated.length !== 1) {
+            this.setStakes(this.stakes + this.currentPlayer.withdraw(this.bet))
+            if (this.currentPlayer.bankrupt) this.currentPlayer.unseat()
+        }
         if (this.seated.length !== 1) this.enterTurn(this.whoPlaysNext)
-        else if (this.round === this.maxRound) this.enterRoundCeremony()
-        else this.enterRoundInit(this.round + 1)
+        else this.enterRoundCeremony()
     }
+    @allowedIn(["Turn"])
     shoot(shooter: Player, target: Player) {
         this.broadcast(new PlayerShot(shooter, target))
         if (shooter.buff.Curse) {
@@ -148,12 +167,15 @@ export class Game implements GameBase {
         }
         this.turnDone()
     }
+    @allowedIn(["Turn"])
     drawCard(drawing: Player) {
         drawing.getCard(randomCard())
         this.turnDone()
     }
+    @allowedIn(["Turn"])
     playCard(playing: Player) {
-        const played = playing.card as Card
+        const played = playing.card
+        if (!played) throw new Error("playCard() called with no card")
         playing.loseCard()
         this.broadcast(new CardPlayed(played))
         dispatchCardStrategy(played)(playing)
@@ -164,10 +186,10 @@ export class Game implements GameBase {
         this.broadcast(new NowTurnOf(p))
         p.unsetBuff(LastDitch)
         this.timeRemaining = Game.timeLimit
-        this.countdown = setInterval(() => {
+        this.timer = setInterval(() => {
             this.broadcast(new Countdown(Game.timeLimit, this.timeRemaining))
             if (this.timeRemaining <= 0) {
-                this.clearCountdown()
+                this.clearTimer()
                 this.shoot(p, this.randomSeated(p))
             } else this.timeRemaining -= Game.timeQuantum
         }, Game.timeQuantum)
@@ -176,6 +198,7 @@ export class Game implements GameBase {
     private enterRoundInit(no: number) {
         this.round = no
         this.broadcast(new NewRound(no))
+        this.setStakes(0)
         for (const p of this.players) p.reset()
         this.enterBetSetup()
     }
@@ -187,10 +210,12 @@ export class Game implements GameBase {
         else this.currentPlayer = this.lastWinner
         this.broadcast(new BetSetupStart(this.currentPlayer))
         this.timeRemaining = Game.timeLimit
-        this.countdown = setInterval(() => {
+        this.timer = setInterval(() => {
             this.broadcast(new Countdown(Game.timeLimit, this.timeRemaining))
-            if (this.timeRemaining <= 0) this.setBet(this.defaultBetAmount)
-            else this.timeRemaining -= Game.timeQuantum
+            if (this.timeRemaining <= 0) {
+                this.clearTimer()
+                this.setBet(this.defaultBetAmount)
+            } else this.timeRemaining -= Game.timeQuantum
         }, Game.timeQuantum)
     }
     @enterState("RoundCeremony")
@@ -198,14 +223,18 @@ export class Game implements GameBase {
         const lastManStanding = this.seated[0]
         this.lastWinner = lastManStanding
         this.broadcast(new RoundWinner(lastManStanding))
-        if (this.round === this.maxRound) this.enterGameOver()
-        else this.enterRoundInit(this.round + 1)
+        this.timer = setTimeout(() => {
+            if (this.round === this.maxRound) this.enterGameOver()
+            else this.enterRoundInit(this.round + 1)
+        }, Game.ceremonyTimeLimit)
     }
     @enterState("GameOver")
     private enterGameOver() {
         this.broadcast(new GameOver())
     }
-    protected clearCountdown() {
-        if (this.countdown) clearInterval(this.countdown)
+    protected clearTimer() {
+        // Here, we use clearInterval() also for setTimeout().
+        // https://developer.mozilla.org/en-US/docs/Web/API/clearInterval
+        if (this.timer) clearInterval(this.timer)
     }
 }

@@ -85,7 +85,7 @@ export class Player extends EnqueueOnEvent implements PlayerBase {
         return this.balance
     }
     /**
-     * Withdraws the given amount from the balance.
+     * Withdraw the given amount from the balance.
      * If the balance is insufficient, take all the balance.
      * @param n the amount to withdraw.
      * @returns the actual amount withdrawn.

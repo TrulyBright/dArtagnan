@@ -1,7 +1,7 @@
 import { Game } from "#game"
 import { Player } from "#player"
 import { Room } from "#room"
-import { BetSetupDone, BetSetupStart, Countdown, NewRound, NowTurnOf, PlayerShot, PlayerStatus } from "@dartagnan/api/event"
+import { BetSetupDone, BetSetupStart, Countdown, NewRound, NowTurnOf, PlayerShot, PlayerStatus, RoundWinner, Stakes } from "@dartagnan/api/event"
 import { State } from "@dartagnan/api/game"
 import { beforeEach, expect, test, vi } from "vitest"
 
@@ -25,40 +25,85 @@ test("Game overall", () => {
     }
     expect(G.state).toBe(Idle)
     G.start()
-    for (const p of players) {
-        expect(p.earliestEvent).toStrictEqual(new NewRound(1))
-        // players are reset.
-        for (const other of players)
-            expect(p.earliestEvent).toStrictEqual(new PlayerStatus(other))
-    }
-    expect(G.state).toBe(BetSetup)
-    const first = players[0]
-    expect(G.currentPlayer).toBe(first)
-    for (const p of players)
-        expect(p.earliestEvent).toStrictEqual(new BetSetupStart(players[0]))
-    for (let elapsed = 0; elapsed <= Game.timeLimit; elapsed += Game.timeQuantum) {
-        vi.runOnlyPendingTimers()
+    let index = 1
+    // while (index <= G.maxRound) {
+        for (const p of players) {
+            expect(p.earliestEvent).toStrictEqual(new NewRound(index))
+            expect(p.earliestEvent).toStrictEqual(new Stakes(0))
+            // players are reset.
+            for (const other of players)
+                expect(p.earliestEvent).toStrictEqual(new PlayerStatus(other))
+        }
+        expect(G.state).toBe(BetSetup)
+        expect(G.currentPlayer).not.toBeNull()
+        const betSetter = G.currentPlayer!
+        if (index === 1) expect(G.currentPlayer).toBe(betSetter)
         for (const p of players)
-            expect(p.earliestEvent)
-            .toStrictEqual(new Countdown(Game.timeLimit, Game.timeLimit - elapsed))
-    }
-    for (const p of players) {
-        expect(p.earliestEvent).toStrictEqual(new BetSetupDone(G.defaultBetAmount))
-        expect(G.currentPlayer).toStrictEqual(first)
-        expect(p.earliestEvent).toStrictEqual(new NowTurnOf(first))
-        expect(p.earliestEvent).toStrictEqual(new PlayerStatus(first)) // reset lastditch
-    }
-    const spy = vi.spyOn(G, "shoot")
-    for (let elapsed = 0; elapsed <= Game.timeLimit; elapsed += Game.timeQuantum) {
-        vi.runOnlyPendingTimers()
-        for (const p of players)
-            expect(p.earliestEvent)
-            .toStrictEqual(new Countdown(Game.timeLimit, Game.timeLimit - elapsed))
-    }
-    expect(spy).toHaveBeenCalledOnce()
-    // shoot at random player on timeout
-    const got = players[0].earliestEvent as PlayerShot
-    for (const p of players.slice(1)) {
-        expect(p.earliestEvent).toStrictEqual(got)
-    }
+            expect(p.earliestEvent).toStrictEqual(new BetSetupStart(players[0]))
+        for (let elapsed = 0; elapsed <= Game.timeLimit; elapsed += Game.timeQuantum) {
+            vi.runOnlyPendingTimers()
+            for (const p of players)
+                expect(p.earliestEvent)
+                .toStrictEqual(new Countdown(Game.timeLimit, Game.timeLimit - elapsed))
+        }
+        // bet set timeout.
+        for (const p of players) {
+            expect(p.earliestEvent).toStrictEqual(new BetSetupDone(G.defaultBetAmount))
+        }
+        expect(G.currentPlayer).toBe(betSetter)
+        do {
+            const stakes = G.stakes
+            expect(G.state).toBe(Turn)
+            for (const p of players) {
+                expect(p.earliestEvent).toStrictEqual(new NowTurnOf(G.currentPlayer!))
+                expect(p.earliestEvent).toStrictEqual(new PlayerStatus(G.currentPlayer!)) // LastDitch is reset.
+            }
+            const originalBalance: Record<Player["index"], Player["balance"]> = Object.assign({}, ...G.players.map(p => ({ [p.index]: p.balance })))
+            const shooter = G.currentPlayer!
+            for (let elapsed = 0; elapsed <= Game.timeLimit; elapsed += Game.timeQuantum) {
+                vi.runOnlyPendingTimers()
+                for (const p of players)
+                    expect(p.earliestEvent)
+                    .toStrictEqual(new Countdown(Game.timeLimit, Game.timeLimit - elapsed))
+            }
+            // shoot at random player on timeout
+            const e = players[0].earliestEvent as PlayerShot
+            expect(e).toBeInstanceOf(PlayerShot)
+            const { target } = e
+            for (const p of players.slice(1)) {
+                expect(p.earliestEvent).toStrictEqual(e)
+            }
+            if (target.seated) { // miss
+                expect(shooter.balance).toBe(Math.max(0, originalBalance[shooter.index] - G.bet)) // only bet.
+                expect(target.balance).toBe(originalBalance[target.index])
+            } else { // hit
+                // Take loot and bet it after. Do not bet if the round is over.
+                expect(shooter.balance).toBe(
+                    G.seated.length === 1 ?
+                    originalBalance[shooter.index] + G.bet :
+                    originalBalance[shooter.index]
+                )
+                expect(target.balance).toBe(Math.max(0, originalBalance[target.index] - G.bet))
+                for (const p of players) {
+                    expect(p.earliestEvent).toStrictEqual(new PlayerStatus(target)) // withdraw
+                    expect(p.earliestEvent).toStrictEqual(new PlayerStatus(shooter)) // deposit
+                    expect(p.earliestEvent).toStrictEqual(new PlayerStatus(shooter)) // lose robbery
+                    expect(p.earliestEvent).toStrictEqual(new PlayerStatus(target)) // unseat with no insurance
+                }
+            }
+            if (G.seated.length === 1) {
+                for (const p of players) {
+                    expect(p.earliestEvent).toStrictEqual(new RoundWinner(G.seated[0]))
+                }
+            } else {
+                expect(G.stakes).toBe(stakes + G.bet)
+                for (const p of players) {
+                    expect(p.earliestEvent).toStrictEqual(new PlayerStatus(shooter)) // bet
+                    expect(p.earliestEvent).toStrictEqual(new Stakes(G.stakes))
+                    if (shooter.bankrupt)
+                        expect(p.earliestEvent).toStrictEqual(new PlayerStatus(shooter)) // unseat
+                }
+            }
+        } while (G.seated.length !== 1)
+    // }
 })
