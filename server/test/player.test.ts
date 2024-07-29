@@ -1,7 +1,7 @@
 import { Game } from "#game"
 import { Player } from "#player"
 import { Room } from "#room"
-import { BetSetupStart, Countdown, NewRound, PlayerStatus } from "@dartagnan/api/event"
+import { BetSetupDone, BetSetupStart, Countdown, NewRound, NowTurnOf, PlayerStatus } from "@dartagnan/api/event"
 import { State } from "@dartagnan/api/game"
 import { beforeEach, expect, test, vi } from "vitest"
 
@@ -27,18 +27,31 @@ test("Game overall", () => {
     G.start()
     for (const p of players) {
         expect(p.earliestEvent).toStrictEqual(new NewRound(1))
-        for (const other of players) {
+        // players are reset.
+        for (const other of players)
             expect(p.earliestEvent).toStrictEqual(new PlayerStatus(other))
-        }
     }
     expect(G.state).toBe(BetSetup)
-    expect(G.currentPlayer).toBe(players[0])
-    for (const p of players) {
+    const first = players[0]
+    expect(G.currentPlayer).toBe(first)
+    for (const p of players)
         expect(p.earliestEvent).toStrictEqual(new BetSetupStart(players[0]))
-    }
-    for (let elapsed = 0; elapsed < Game.timeLimit; elapsed += Game.timeQuantum) {
+    for (let elapsed = 0; elapsed <= Game.timeLimit; elapsed += Game.timeQuantum) {
         vi.runOnlyPendingTimers()
         for (const p of players)
-            expect(p.earliestEvent).toStrictEqual(new Countdown(Game.timeLimit, Game.timeLimit - elapsed))
+            expect(p.earliestEvent)
+            .toStrictEqual(new Countdown(Game.timeLimit, Game.timeLimit - elapsed))
+    }
+    for (const p of players) {
+        expect(p.earliestEvent).toStrictEqual(new BetSetupDone(G.defaultBetAmount))
+        expect(G.currentPlayer).toStrictEqual(first)
+        expect(p.earliestEvent).toStrictEqual(new NowTurnOf(first))
+        expect(p.earliestEvent).toStrictEqual(new PlayerStatus(first)) // reset lastditch
+    }
+    for (let elapsed = 0; elapsed <= Game.timeLimit; elapsed += Game.timeQuantum) {
+        vi.runOnlyPendingTimers()
+        for (const p of players)
+            expect(p.earliestEvent)
+            .toStrictEqual(new Countdown(Game.timeLimit, Game.timeLimit - elapsed))
     }
 })
