@@ -1,7 +1,7 @@
 import { Game } from "#game"
 import { Player } from "#player"
 import { Room } from "#room"
-import { BetSetupDone, BetSetupStart, Countdown, NewRound, NowTurnOf, PlayerStatus } from "@dartagnan/api/event"
+import { BetSetupDone, BetSetupStart, Countdown, NewRound, NowTurnOf, PlayerShot, PlayerStatus } from "@dartagnan/api/event"
 import { State } from "@dartagnan/api/game"
 import { beforeEach, expect, test, vi } from "vitest"
 
@@ -48,10 +48,17 @@ test("Game overall", () => {
         expect(p.earliestEvent).toStrictEqual(new NowTurnOf(first))
         expect(p.earliestEvent).toStrictEqual(new PlayerStatus(first)) // reset lastditch
     }
+    const spy = vi.spyOn(G, "shoot")
     for (let elapsed = 0; elapsed <= Game.timeLimit; elapsed += Game.timeQuantum) {
         vi.runOnlyPendingTimers()
         for (const p of players)
             expect(p.earliestEvent)
             .toStrictEqual(new Countdown(Game.timeLimit, Game.timeLimit - elapsed))
+    }
+    expect(spy).toHaveBeenCalledOnce()
+    // shoot at random player on timeout
+    const got = players[0].earliestEvent as PlayerShot
+    for (const p of players.slice(1)) {
+        expect(p.earliestEvent).toStrictEqual(got)
     }
 })

@@ -150,7 +150,7 @@ export class Game implements GameBase {
     }
     drawCard(drawing: Player) {
         drawing.getCard(randomCard())
-        drawing.game.turnDone()
+        this.turnDone()
     }
     playCard(playing: Player) {
         const played = playing.card as Card
@@ -168,10 +168,7 @@ export class Game implements GameBase {
             this.broadcast(new Countdown(Game.timeLimit, this.timeRemaining))
             if (this.timeRemaining <= 0) {
                 this.clearCountdown()
-                dispatchCmd({
-                    tag: "Shoot",
-                    index: this.randomSeated(this.currentPlayer).index,
-                }).exec(p)
+                this.shoot(p, this.randomSeated(p))
             } else this.timeRemaining -= Game.timeQuantum
         }, Game.timeQuantum)
     }

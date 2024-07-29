@@ -99,6 +99,7 @@ class CSetDrift implements Cmd<SetDrift> {
         a.setDrift(this.drift)
     }
 }
+
 // biome-ignore format: better look like a switch-case.
 type CmdByTag<A extends Action> =
     A["tag"] extends Speak["tag"] ? CSpeak :
