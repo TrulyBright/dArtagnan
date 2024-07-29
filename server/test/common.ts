@@ -1,5 +1,5 @@
 import { User } from "#user"
-import { Username, isUsername } from "@dartagnan/api/user"
+import { type Username, isUsername } from "@dartagnan/api/user"
 
 export const unameGen = (): Username => {
     const s = Math.floor(Math.random() * 100).toString(36)
