@@ -114,18 +114,25 @@ type CmdByTag<A extends Action> =
 export const dispatchCmd = <T extends Action>(a: T): CmdByTag<T> => {
     switch (a.tag) {
         case "Speak":
+            // @ts-expect-error
             return new CSpeak(a.message)
         case "StartGame":
+            // @ts-expect-error
             return new CStartGame()
         case "SetBet":
+            // @ts-expect-error
             return new CSetBet(a.amount)
         case "Shoot":
+            // @ts-expect-error
             return new CShoot(a.index)
         case "DrawCard":
+            // @ts-expect-error
             return new CDrawCard()
         case "PlayCard":
+            // @ts-expect-error
             return new CPlayCard()
         case "SetDrift":
+            // @ts-expect-error
             return new CSetDrift(a.drift)
     }
 }
