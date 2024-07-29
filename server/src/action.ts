@@ -102,13 +102,13 @@ class CSetDrift implements Cmd<SetDrift> {
 
 // biome-ignore format: better look like a switch-case.
 type CmdByTag<A extends Action> =
-    A["tag"] extends Speak["tag"] ? CSpeak :
-    A["tag"] extends StartGame["tag"] ? CStartGame :
-    A["tag"] extends SetBet["tag"] ? CSetBet :
-    A["tag"] extends Shoot["tag"] ? CShoot :
-    A["tag"] extends DrawCard["tag"] ? CDrawCard :
-    A["tag"] extends PlayCard["tag"] ? CPlayCard :
-    A["tag"] extends SetDrift["tag"] ? CSetDrift :
+    A extends Speak ? CSpeak :
+    A extends StartGame ? CStartGame :
+    A extends SetBet ? CSetBet :
+    A extends Shoot ? CShoot :
+    A extends DrawCard ? CDrawCard :
+    A extends PlayCard ? CPlayCard :
+    A extends SetDrift ? CSetDrift :
     never
 
 export const dispatchCmd = <T extends Action>(a: T): CmdByTag<T> => {

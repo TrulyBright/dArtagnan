@@ -20,7 +20,7 @@ export class GameServer {
             const user = new User(name)
             this.hub.addUser(user, code)
             ws.on("message", data => {
-                const parsed: Action = JSON.parse(data.toString())
+                const parsed = JSON.parse(data.toString())
                 const cmd = dispatchCmd(parsed)
                 if (cmd.isUserCmd) cmd.exec(user)
                 else if (user.player) cmd.exec(user.player)
