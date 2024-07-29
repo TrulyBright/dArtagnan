@@ -20,7 +20,6 @@ import {
     TurnOrder,
 } from "@dartagnan/api/event"
 import type { GameBase, State } from "@dartagnan/api/game"
-import { a } from "vitest/dist/suite-BWgaIsVn.js"
 import { dispatchCmd } from "#action"
 import { dispatchCardStrategy, randomCard } from "#card"
 import type { Listener } from "#listening"
@@ -164,6 +163,7 @@ export class Game implements GameBase {
         this.currentPlayer = p
         this.broadcast(new NowTurnOf(p))
         p.unsetBuff(LastDitch)
+        this.timeRemaining = Game.timeLimit
         this.countdown = setInterval(() => {
             this.broadcast(new Countdown(Game.timeLimit, this.timeRemaining))
             if (this.timeRemaining <= 0) {
@@ -189,6 +189,7 @@ export class Game implements GameBase {
             throw new Error("No last winner in previous round")
         else this.currentPlayer = this.lastWinner
         this.broadcast(new BetSetupStart(this.currentPlayer))
+        this.timeRemaining = Game.timeLimit
         this.countdown = setInterval(() => {
             this.broadcast(new Countdown(Game.timeLimit, this.timeRemaining))
             if (this.timeRemaining <= 0) this.setBet(this.defaultBetAmount)
