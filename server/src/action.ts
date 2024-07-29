@@ -9,11 +9,8 @@ import type {
     StartGame,
     UserAction,
 } from "@dartagnan/api/action"
-import { Bulletproof, Curse, Robbery } from "@dartagnan/api/card"
 import type { Drift } from "@dartagnan/api/drift"
 import { NeedToBeHost, Unstartable } from "@dartagnan/api/error"
-import { CardPlayed, PlayerShot, UserSpoke } from "@dartagnan/api/event"
-import { dispatchCardStrategy, randomCard } from "#card"
 import type { Player } from "#player"
 import type { User } from "#user"
 
@@ -32,7 +29,7 @@ class CSpeak implements Cmd<Speak> {
     readonly isUserCmd = true
     exec(a: User): void {
         if (!this.message) return
-        a.room?.broadcast(new UserSpoke(this.message, a))
+        a.room?.speak(a, this.message)
     }
 }
 
@@ -102,22 +99,16 @@ class CSetDrift implements Cmd<SetDrift> {
         a.setDrift(this.drift)
     }
 }
-
-type CmdByTag<A extends Action> = A["tag"] extends Speak["tag"]
-    ? CSpeak
-    : A["tag"] extends StartGame["tag"]
-      ? CStartGame
-      : A["tag"] extends SetBet["tag"]
-        ? CSetBet
-        : A["tag"] extends Shoot["tag"]
-          ? CShoot
-          : A["tag"] extends DrawCard["tag"]
-            ? CDrawCard
-            : A["tag"] extends PlayCard["tag"]
-              ? CPlayCard
-              : A["tag"] extends SetDrift["tag"]
-                ? CSetDrift
-                : never
+// biome-ignore format: better look like a switch-case.
+type CmdByTag<A extends Action> =
+    A["tag"] extends Speak["tag"] ? CSpeak :
+    A["tag"] extends StartGame["tag"] ? CStartGame :
+    A["tag"] extends SetBet["tag"] ? CSetBet :
+    A["tag"] extends Shoot["tag"] ? CShoot :
+    A["tag"] extends DrawCard["tag"] ? CDrawCard :
+    A["tag"] extends PlayCard["tag"] ? CPlayCard :
+    A["tag"] extends SetDrift["tag"] ? CSetDrift :
+    never
 
 export const dispatchCmd = <T extends Action>(a: T): CmdByTag<T> => {
     switch (a.tag) {

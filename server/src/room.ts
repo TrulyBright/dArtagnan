@@ -4,6 +4,7 @@ import {
     NewHost,
     UserEntered,
     UserLeft,
+    UserSpoke,
 } from "@dartagnan/api/event"
 import type { RoomBase } from "@dartagnan/api/room"
 import { Game } from "#game"
@@ -46,6 +47,9 @@ export class Room implements RoomBase {
             throw new Error("User not in room")
         this.users.splice(index, 1)
         this.broadcast(new UserLeft(u))
+    }
+    speak(speaker: User, message: string) {
+        this.broadcast(new UserSpoke(message, speaker))
     }
     startGame() {
         const g = new Game()
