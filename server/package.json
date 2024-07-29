@@ -9,7 +9,8 @@
 		"test:watch": "vitest watch",
 		"check-types": "tsc",
 		"format-lint": "biome check src",
-		"format-lint:fix": "biome check src --write"
+		"format-lint:fix": "biome check src --write",
+		"format-test:fix": "biome format test --write"
 	},
 	"dependencies": {
 		"@dartagnan/api": "workspace:*",
