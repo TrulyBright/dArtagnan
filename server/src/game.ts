@@ -182,6 +182,7 @@ export class Game implements GameBase {
     }
     @enterState("Turn")
     private enterTurn(p: Player) {
+        // for (const p of this.seated) p.setAccuracy(p.nextDriftedAccuracy)
         this.currentPlayer = p
         this.broadcast(new NowTurnOf(p))
         p.unsetBuff(LastDitch)

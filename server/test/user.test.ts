@@ -10,35 +10,44 @@ import {
     RoomFull,
     Unstartable,
 } from "@dartagnan/api/error"
-import { uGen } from "#test/common"
+import { createExpectRecvd, RecvExpector, uGen } from "#test/common"
+import { User } from "#user"
 
-let H: Hub
-beforeEach(() => {
-    H = new Hub()
+type UserTestContext = {
+    H: Hub
+    users: User[]
+    expectRecvd: RecvExpector
+}
+
+beforeEach<UserTestContext>(async context => {
+    context.H = new Hub()
+    context.users = Array.from({ length: 100 }, uGen)
+    context.expectRecvd = createExpectRecvd(context.users)
 })
 
-test("User creates, enters, speaks in, and leaves a room", () => {
+test<UserTestContext>("User creates, enters, speaks in, and leaves a room", ({
+    H,
+    users,
+    expectRecvd,
+}) => {
     // Create
-    const host = uGen()
+    const host = users[0]
     H.addUser(host, null)
-    expect(host.earliestEvent).toStrictEqual(new UserEntered(host))
-    expect(host.earliestEvent).toStrictEqual(new NewHost(host))
+    expectRecvd(host, new UserEntered(host))
+    expectRecvd(host, new NewHost(host))
     const room = host.room!
     expect(room).not.toBeNull()
     expect(room.users).toEqual([host])
     expect(room.code).toMatch(CodeRegex)
     expect(room.startable).toBe(false)
     expect(room.playing).toBe(false)
-
     // Enter
-    const guests = Array.from(
-        { length: Room.MAX_MEMBERS - room.users.length },
-        uGen,
-    )
+    const guests = users
+        .filter(u => u !== host)
+        .slice(0, Room.MAX_MEMBERS - room.users.length)
     for (const g of guests) {
         H.addUser(g, room.code)
-        for (const o of room.users)
-            expect(o.earliestEvent).toStrictEqual(new UserEntered(g))
+        for (const o of room.users) expectRecvd(o, new UserEntered(g))
         const msg = g.name + "speaks!"
         const cmd = dispatchCmd({
             tag: "Speak",
@@ -46,23 +55,17 @@ test("User creates, enters, speaks in, and leaves a room", () => {
         })
         if (!cmd.isUserCmd) throw new Error("CSpeak not usercmd")
         cmd.exec(g)
-        for (const o of room.users)
-            expect(o.earliestEvent).toStrictEqual(new UserSpoke(msg, g))
-        for (const outsider of guests.filter(g => !room.users.includes(g)))
-            expect(outsider.gotNoEvent).toBe(true)
+        for (const o of room.users) expectRecvd(o, new UserSpoke(msg, g))
     }
     expect(room.full).toBe(true)
     const latecomer = uGen()
     expect(() => H.addUser(latecomer, room.code)).toThrowError(new RoomFull())
-
     // Leave
     for (const leaver of room.users.slice()) {
         H.removeUser(leaver)
         for (const remaining of room.users) {
-            expect(remaining.earliestEvent).toStrictEqual(new UserLeft(leaver))
-            expect(remaining.earliestEvent).toStrictEqual(
-                new NewHost(room.users[0]),
-            )
+            expectRecvd(remaining, new UserLeft(leaver))
+            expectRecvd(remaining, new NewHost(room.users[0]))
         }
     }
     expect(room.empty).toBe(true)
@@ -71,7 +74,7 @@ test("User creates, enters, speaks in, and leaves a room", () => {
     )
 })
 
-test("Host can start a game while guests cannot.", () => {
+test<UserTestContext>("Host can start a game while guests cannot.", ({ H }) => {
     const cmd = dispatchCmd({ tag: "StartGame" })
     if (!cmd.isUserCmd) throw new Error(`StartGame not isUserCmd`)
     const host = uGen()

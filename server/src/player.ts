@@ -1,10 +1,18 @@
 import { type Buff, type Card, Insurance } from "@dartagnan/api/card"
 import { type Drift, randomDrift } from "@dartagnan/api/drift"
 import { PlayerDrewCard, PlayerStatus, YourCard } from "@dartagnan/api/event"
+import type { Event } from "@dartagnan/api/event"
 import type { PlayerBase } from "@dartagnan/api/player"
 import { BuffResetLiteral, randomCard } from "#card"
 import type { Game } from "#game"
-import { EnqueueOnEvent } from "#queue"
+import { Listening } from "#listening"
+
+// biome-ignore format: better look like an if-else.
+const inRange = (n: number, max: number, min: number) => (
+    min > n ? min :
+    max < n ? max :
+    n
+)
 
 const broadcastStatus = (
     target: Player,
@@ -20,7 +28,9 @@ const broadcastStatus = (
     return descriptor
 }
 
-export class Player extends EnqueueOnEvent implements PlayerBase {
+export class Player extends Listening<Event> implements PlayerBase {
+    static readonly ACCURACY_MAX = 0.99
+    static readonly ACCURACY_MIN = 0.01
     constructor(
         readonly index: number,
         readonly game: Game,
@@ -31,10 +41,18 @@ export class Player extends EnqueueOnEvent implements PlayerBase {
     seated = true
     balance = 200
     card: Card | null = null
-    accuracy = Math.random()
+    accuracy = inRange(Math.random(), Player.ACCURACY_MAX, Player.ACCURACY_MIN)
     drift = randomDrift()
     get bankrupt() {
         return this.balance <= 0
+    }
+    get nextDriftedAccuracy(): number {
+        const increment = 0.08 * this.drift
+        const error = (Math.random() - 0.5) * 0.2 // TODO: ask mathematicians.
+        const next = this.buff.Mediation
+            ? this.accuracy + increment
+            : this.accuracy + increment + error
+        return inRange(next, Player.ACCURACY_MAX, Player.ACCURACY_MIN)
     }
     @broadcastStatus
     setDrift(d: Drift) {

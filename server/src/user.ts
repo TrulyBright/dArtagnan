@@ -1,9 +1,10 @@
+import type { Event } from "@dartagnan/api/event"
 import type { UserBase, Username } from "@dartagnan/api/user"
+import { Listening } from "#listening"
 import type { Player } from "#player"
-import { EnqueueOnEvent } from "#queue"
 import type { Room } from "#room"
 
-export class User extends EnqueueOnEvent implements UserBase {
+export class User extends Listening<Event> implements UserBase {
     private static nextId = 0
     readonly id = User.nextId++
     room: Room | null = null
