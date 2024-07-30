@@ -14,3 +14,6 @@ pre-commit:
     format-and-lint:
       run: turbo format-lint:fix
       stage_fixed: true
+    format-test:fix:
+      run: turbo format-test:fix
+      stage_fixed: true
