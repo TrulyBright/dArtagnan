@@ -1,3 +1,4 @@
+import { dispatchCmd } from "#action"
 import { Game } from "#game"
 import { Player } from "#player"
 import { Room } from "#room"
@@ -15,11 +16,13 @@ import {
 } from "@dartagnan/api/event"
 import { beforeEach, expect, test, vi } from "vitest"
 
-beforeEach(() => {
-    vi.useFakeTimers()
-})
+type GameTestContext = {
+    G: Game
+    players: Player[]
+}
 
-test("Game overall", () => {
+beforeEach<GameTestContext>(async (context) => {
+    vi.useFakeTimers()
     const G = new Game()
     const players = Array.from(
         { length: Room.MAX_MEMBERS },
@@ -31,6 +34,11 @@ test("Game overall", () => {
     }
     expect(G.state).toBe("Idle")
     G.start()
+    context.G = G
+    context.players = players
+})
+
+test<GameTestContext>("Game overall", ({ G, players }) => {
     for (let roundIndex = 1; roundIndex <= G.maxRound; roundIndex++) {
         expect(G.round).toBe(roundIndex)
         for (const p of players) {
@@ -99,23 +107,20 @@ test("Game overall", () => {
             for (const p of players.slice(1)) {
                 expect(p.earliestEvent).toStrictEqual(e)
             }
+            const loot = Math.min(target.balance, G.bet)
             if (target.seated) {
                 // miss
-                expect(shooter.balance).toBe(
-                    Math.max(0, originalBalance[shooter.index] - G.bet),
-                ) // only bet.
+                expect(shooter.balance).toBe(Math.max(0, originalBalance[shooter.index] - G.bet)) // only bet.
                 expect(target.balance).toBe(originalBalance[target.index])
             } else {
                 // hit
                 // Take loot and bet it after. Do not bet if the round is over.
                 expect(shooter.balance).toBe(
                     G.seated.length === 1
-                        ? originalBalance[shooter.index] + G.bet
-                        : originalBalance[shooter.index],
+                        ? originalBalance[shooter.index] + loot
+                        : Math.max(0, originalBalance[shooter.index] + loot - G.bet),
                 )
-                expect(target.balance).toBe(
-                    Math.max(0, originalBalance[target.index] - G.bet),
-                )
+                expect(target.balance).toBe(originalBalance[target.index] - loot)
                 for (const p of players) {
                     expect(p.earliestEvent).toStrictEqual(
                         new PlayerStatus(target),
@@ -138,7 +143,7 @@ test("Game overall", () => {
                     )
                 }
             } else {
-                expect(G.stakes).toBe(stakes + G.bet)
+                expect(G.stakes).toBe(stakes + loot)
                 for (const p of players) {
                     expect(p.earliestEvent).toStrictEqual(
                         new PlayerStatus(shooter),
@@ -157,4 +162,26 @@ test("Game overall", () => {
     for (const p of players) {
         expect(p.earliestEvent).toStrictEqual(new GameOver())
     }
+})
+
+test<GameTestContext>("Designated BetSetup", ({ G, players }) => {
+    expect(G.state).toBe("BetSetup")
+    const defaultBetAmount = G.bet
+    const cmd = dispatchCmd({
+        tag: 'SetBet',
+        amount: Math.floor((G.betWindow[0] + G.betWindow[1]) * 2 / 3
+    )})
+    for (const p of players) if (p !== G.currentPlayer) cmd.exec(p)
+    expect(G.state).toBe("BetSetup")
+    expect(G.bet).toBe(defaultBetAmount)
+    
+    cmd.exec(G.currentPlayer!)
+
+    expect(G.bet).not.toBe(defaultBetAmount)
+    expect(G.bet).toBe(cmd.amount)
+    expect(G.state).toBe("Turn")
+    const drawing = G.currentPlayer!
+    const originalBalance = drawing.balance
+    dispatchCmd({tag: 'DrawCard'}).exec(drawing)
+    expect(drawing.balance).toBe(originalBalance - cmd.amount)
 })
