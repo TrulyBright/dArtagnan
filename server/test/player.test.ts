@@ -21,7 +21,7 @@ type GameTestContext = {
     players: Player[]
 }
 
-beforeEach<GameTestContext>(async (context) => {
+beforeEach<GameTestContext>(async context => {
     vi.useFakeTimers()
     const G = new Game()
     const players = Array.from(
@@ -34,6 +34,7 @@ beforeEach<GameTestContext>(async (context) => {
     }
     expect(G.state).toBe("Idle")
     G.start()
+    expect(G.state).toBe("BetSetup")
     context.G = G
     context.players = players
 })
@@ -107,20 +108,32 @@ test<GameTestContext>("Game overall", ({ G, players }) => {
             for (const p of players.slice(1)) {
                 expect(p.earliestEvent).toStrictEqual(e)
             }
-            const loot = Math.min(target.balance, G.bet)
+            const loot = Math.min(originalBalance[target.index], G.bet)
+            expect(loot).toBeGreaterThan(0)
             if (target.seated) {
                 // miss
-                expect(shooter.balance).toBe(Math.max(0, originalBalance[shooter.index] - G.bet)) // only bet.
+                expect(shooter.balance).toBe(
+                    Math.max(0, originalBalance[shooter.index] - G.bet),
+                ) // only bet.
                 expect(target.balance).toBe(originalBalance[target.index])
+                expect(target.seated).toBe(true)
             } else {
                 // hit
-                // Take loot and bet it after. Do not bet if the round is over.
-                expect(shooter.balance).toBe(
-                    G.seated.length === 1
-                        ? originalBalance[shooter.index] + loot
-                        : Math.max(0, originalBalance[shooter.index] + loot - G.bet),
+                // loot and bet it after. Do not bet if the round is over.
+                if (G.seated.length === 1)
+                    expect(shooter.balance).toBe(
+                        originalBalance[shooter.index] + loot,
+                    )
+                else
+                    expect(shooter.balance).toBe(
+                        Math.max(
+                            0,
+                            originalBalance[shooter.index] + loot - G.bet,
+                        ),
+                    )
+                expect(target.balance).toBe(
+                    originalBalance[target.index] - loot,
                 )
-                expect(target.balance).toBe(originalBalance[target.index] - loot)
                 for (const p of players) {
                     expect(p.earliestEvent).toStrictEqual(
                         new PlayerStatus(target),
@@ -135,15 +148,20 @@ test<GameTestContext>("Game overall", ({ G, players }) => {
                         new PlayerStatus(target),
                     ) // unseat with no insurance
                 }
+                expect(target.seated).toBe(false)
             }
             if (G.seated.length === 1) {
+                expect(G.state).toBe("RoundCeremony")
                 for (const p of players) {
                     expect(p.earliestEvent).toStrictEqual(
                         new RoundWinner(G.seated[0]),
                     )
                 }
             } else {
-                expect(G.stakes).toBe(stakes + loot)
+                expect(G.stakes).toBe(
+                    stakes +
+                        Math.min(originalBalance[shooter.index] + loot, G.bet),
+                )
                 for (const p of players) {
                     expect(p.earliestEvent).toStrictEqual(
                         new PlayerStatus(shooter),
@@ -153,6 +171,7 @@ test<GameTestContext>("Game overall", ({ G, players }) => {
                         expect(p.earliestEvent).toStrictEqual(
                             new PlayerStatus(shooter),
                         ) // unseat
+                    expect(shooter.seated).not.toBe(shooter.bankrupt)
                 }
             }
         } while (G.seated.length !== 1)
@@ -168,20 +187,38 @@ test<GameTestContext>("Designated BetSetup", ({ G, players }) => {
     expect(G.state).toBe("BetSetup")
     const defaultBetAmount = G.bet
     const cmd = dispatchCmd({
-        tag: 'SetBet',
-        amount: Math.floor((G.betWindow[0] + G.betWindow[1]) * 2 / 3
-    )})
+        tag: "SetBet",
+        amount: Math.floor(((G.betWindow[0] + G.betWindow[1]) * 2) / 3),
+    })
+    // no effect
     for (const p of players) if (p !== G.currentPlayer) cmd.exec(p)
     expect(G.state).toBe("BetSetup")
     expect(G.bet).toBe(defaultBetAmount)
-    
+    // effective
     cmd.exec(G.currentPlayer!)
-
     expect(G.bet).not.toBe(defaultBetAmount)
     expect(G.bet).toBe(cmd.amount)
     expect(G.state).toBe("Turn")
+    // draw card to peacefully end turn and test the bet set by the cmd.
     const drawing = G.currentPlayer!
     const originalBalance = drawing.balance
-    dispatchCmd({tag: 'DrawCard'}).exec(drawing)
+    dispatchCmd({ tag: "DrawCard" }).exec(drawing)
     expect(drawing.balance).toBe(originalBalance - cmd.amount)
+})
+
+test<GameTestContext>("Designated Shot", ({ G, players }) => {
+    G.setBet(G.defaultBetAmount)
+    const shooter = G.currentPlayer!
+    shooter.accuracy = 1
+    const target = G.randomSeated(shooter)
+    for (const p of players) p.clearEventQ()
+    G.shoot(shooter, target)
+    expect(target.seated).toBe(false)
+    for (const p of players) {
+        expect(p.earliestEvent).toStrictEqual(new PlayerShot(shooter, target))
+        expect(p.earliestEvent).toStrictEqual(new PlayerStatus(target)) // withdraw
+        expect(p.earliestEvent).toStrictEqual(new PlayerStatus(shooter)) // deposit
+        expect(p.earliestEvent).toStrictEqual(new PlayerStatus(shooter)) // lose robbery
+        expect(p.earliestEvent).toStrictEqual(new PlayerStatus(target)) // unseat with no insurance
+    }
 })
