@@ -10,6 +10,9 @@ export class Queue<Item> {
     pop() {
         return this.Q.shift()
     }
+    clear() {
+        this.Q.splice(0, this.Q.length)
+    }
     get length() {
         return this.Q.length
     }
@@ -40,5 +43,8 @@ export abstract class EnqueueOnEvent extends Listening<Event> {
         let earliest = this.earliestEvent
         while (earliest === e) earliest = this.earliestEvent
         return earliest
+    }
+    clearEventQ() {
+        this.EventQ.clear()
     }
 }
