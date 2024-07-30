@@ -202,7 +202,7 @@ test<GameTestContext>("Designated BetSetup", ({ G, players }) => {
     // draw card to peacefully end turn and test the bet set by the cmd.
     const drawing = G.currentPlayer!
     const originalBalance = drawing.balance
-    dispatchCmd({ tag: "DrawCard" }).exec(drawing)
+    G.drawCard(drawing)
     expect(drawing.balance).toBe(originalBalance - cmd.amount)
 })
 
@@ -210,7 +210,12 @@ test<GameTestContext>("Designated Shot", ({ G, players }) => {
     G.setBet(G.defaultBetAmount)
     const shooter = G.currentPlayer!
     shooter.accuracy = 1
-    const target = G.randomSeated(shooter)
+    const target =
+        G.seated[(G.seated.indexOf(shooter) + G.turnOrder) % G.seated.length]
+    expect(G.whoPlaysNext).toBe(target)
+    const nextShooter =
+        G.seated[(G.seated.indexOf(target) + G.turnOrder) % G.seated.length]
+    const originalStakes = G.stakes
     for (const p of players) p.clearEventQ()
     G.shoot(shooter, target)
     expect(target.seated).toBe(false)
@@ -219,6 +224,14 @@ test<GameTestContext>("Designated Shot", ({ G, players }) => {
         expect(p.earliestEvent).toStrictEqual(new PlayerStatus(target)) // withdraw
         expect(p.earliestEvent).toStrictEqual(new PlayerStatus(shooter)) // deposit
         expect(p.earliestEvent).toStrictEqual(new PlayerStatus(shooter)) // lose robbery
-        expect(p.earliestEvent).toStrictEqual(new PlayerStatus(target)) // unseat with no insurance
+        expect(p.earliestEvent).toStrictEqual(new PlayerStatus(target)) // unseat
+        expect(p.earliestEvent).toStrictEqual(new PlayerStatus(shooter)) // withdraw bet
+        expect(p.earliestEvent).toStrictEqual(
+            new Stakes(originalStakes + G.bet),
+        ) // add bet
+        if (shooter.bankrupt)
+            expect(p.earliestEvent).toStrictEqual(new PlayerStatus(shooter)) // unseat
+        expect(p.earliestEvent).toStrictEqual(new NowTurnOf(nextShooter))
+        expect(p.earliestEvent).toStrictEqual(new PlayerStatus(nextShooter)) // unset lastDitch
     }
 })
