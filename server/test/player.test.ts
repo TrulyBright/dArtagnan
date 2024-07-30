@@ -16,6 +16,7 @@ import {
 import { beforeEach, expect, test, vi } from "vitest"
 import { createExpectRecvd, RecvExpector } from "./common"
 import { dispatchCmd } from "#action"
+import { Mediation } from "@dartagnan/api/card"
 
 type GameTestContext = {
     G: Game
@@ -80,6 +81,8 @@ test<GameTestContext>("Game overall", ({ G, players, expectRecvd }) => {
             const stakes = G.stakes
             expect(G.state).toBe("Turn")
             for (const p of players) {
+                for (const other of G.seated)
+                    expectRecvd(p, new PlayerStatus(other)) // accuracy is set.
                 expectRecvd(p, new NowTurnOf(G.currentPlayer!))
                 expectRecvd(p, new PlayerStatus(G.currentPlayer!)) // LastDitch is reset.
             }
@@ -217,40 +220,26 @@ test<GameTestContext>("Designated Shot", ({ G, players }) => {
     expect(G.currentPlayer).toBe(nextShooter)
 })
 
-// test<GameTestContext>("Drift: increment", ({ G, players }) => {
-//     for (const p of players) {
-//         p.clearEventQ()
-//     }
-//     for (const p of players) {
-//         p.setDrift(1)
-//         p.setBuff(Mediation)
-//         expect(p.drift).toBe(1)
-//     }
-//     G.setBet(0)
-//     let count = 0
-//     console.log("==========================")
-//     // while (!players.every(p => p.accuracy === Player.ACCURACY_MAX)) {
-//     //     G.drawCard(G.currentPlayer!)
-//     //     console.log(count++)
-//     // }
-// }) // All we do here is wait until it escapes the while loop.
+test<GameTestContext>("Drift: increment", ({ G, players }) => {
+    for (const p of players) {
+        p.setDrift(1)
+        p.setBuff(Mediation)
+        expect(p.drift).toBe(1)
+    }
+    G.setBet(0)
+    while (!players.every(p => p.accuracy === Player.ACCURACY_MAX))
+        G.drawCard(G.currentPlayer!)
+}) // All we do here is wait until it escapes the while loop.
 
-// test<GameTestContext>("Drift: decrement", ({ G, players }) => {
-//     for (const p of players) {
-//         p.clearEventQ()
-//     }
-//     for (const p of players) {
-//         p.setDrift(-1)
-//         p.setBuff(Mediation)
-//         expect(p.drift).toBe(-1)
-//     }
-//     G.setBet(0)
-//     let count = 0
-//     console.log(1234)
-//     // while (!players.every(p => p.accuracy === Player.ACCURACY_MIN)) {
-//     //     G.drawCard(G.currentPlayer!)
-//     //     console.log(count++)
-//     // }
-// }) // All we do here is wait until it escapes the while loop.
+test<GameTestContext>("Drift: decrement", ({ G, players }) => {
+    for (const p of players) {
+        p.setDrift(-1)
+        p.setBuff(Mediation)
+        expect(p.drift).toBe(-1)
+    }
+    G.setBet(0)
+    while (!players.every(p => p.accuracy === Player.ACCURACY_MIN))
+        G.drawCard(G.currentPlayer!)
+}) // All we do here is wait until it escapes the while loop.
 
 // // TODO: how to test Drift 0 (stable) ?
