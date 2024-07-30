@@ -50,6 +50,7 @@ class CSetBet implements Cmd<SetBet> {
     exec(a: Player): void {
         if (a.game?.state !== "BetSetup") return
         if (a.game.currentPlayer !== a) return
+        if (!Number.isSafeInteger(this.amount)) return
         if (this.amount < a.game.betWindow[0]) return
         if (this.amount > a.game.betWindow[1]) return
         a.game.setBet(this.amount)
