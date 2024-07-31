@@ -13,5 +13,6 @@ jobs:
         run_install: true
     - uses: pnpm/action-setup@v4
       with:
-        run_install: -g turbo
+        run_install: |
+          args: [ -g, turbo ]
     - run: turbo test
