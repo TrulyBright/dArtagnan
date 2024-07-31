@@ -13,7 +13,7 @@ jobs:
     - run: |
         npm i -g pnpm
         pnpm setup
-        source /root/.bashrc
+        source ~/.bashrc
         pnpm i
         pnpm i -g turbo
         turbo test
