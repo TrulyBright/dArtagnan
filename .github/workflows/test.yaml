@@ -1,0 +1,19 @@
+on: push
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    env:
+        SHELL: bash
+    steps:
+    - uses: actions/checkout@v4
+    - uses: actions/setup-node@v4
+      with:
+        node-version: 22
+    - run: |
+        npm i -g pnpm
+        pnpm setup
+        source /root/.bashrc
+        pnpm i
+        pnpm i -g turbo
+        turbo test
