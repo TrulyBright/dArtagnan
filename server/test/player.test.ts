@@ -12,6 +12,8 @@ import {
     PlayerStatus,
     RoundWinner,
     Stakes,
+    PlayerDrewCard,
+    YourCard,
 } from "@dartagnan/api/event"
 import { beforeEach, expect, test, vi } from "vitest"
 import { createExpectRecvd, RecvExpector } from "./common"
@@ -77,7 +79,9 @@ test<GameTestContext>("Game overall", ({ G, players, expectRecvd }) => {
         for (const p of players)
             expectRecvd(p, new BetSetupDone(G.defaultBetAmount))
         expect(G.currentPlayer).toBe(betSetter)
+        let willShoot = true
         do {
+            willShoot = !willShoot
             const stakes = G.stakes
             expect(G.state).toBe("Turn")
             for (const p of players) {
@@ -91,6 +95,28 @@ test<GameTestContext>("Game overall", ({ G, players, expectRecvd }) => {
                     {},
                     ...G.players.map(p => ({ [p.index]: p.balance })),
                 )
+            if (!willShoot) {
+                const drawing = G.currentPlayer!
+                G.drawCard(drawing)
+                expectRecvd(drawing, new YourCard(drawing.card))
+                for (const p of players) {
+                    expectRecvd(p, new PlayerDrewCard(drawing))
+                    expectRecvd(p, new PlayerStatus(drawing)) // withdraw
+                    expectRecvd(
+                        p,
+                        new Stakes(
+                            stakes +
+                                Math.min(originalBalance[drawing.index], G.bet),
+                        ),
+                    )
+                    if (drawing.bankrupt)
+                        expectRecvd(p, new PlayerStatus(drawing))
+                }
+                expect(drawing.bankrupt).toBe(
+                    originalBalance[drawing.index] <= G.bet,
+                )
+                continue
+            }
             const shooter = G.currentPlayer!
             const target = G.randomSeated(shooter)
             vi.spyOn(G, "randomSeated").mockReturnValueOnce(target)
@@ -162,7 +188,7 @@ test<GameTestContext>("Game overall", ({ G, players, expectRecvd }) => {
                 const maximum = Math.min(
                     originalBalance[shooter.index] + loot,
                     G.bet,
-                )
+                ) // failing
                 expect(G.stakes).toBe(stakes + maximum)
                 for (const p of players) {
                     expectRecvd(p, new PlayerStatus(shooter)) // bet
@@ -243,3 +269,5 @@ test<GameTestContext>("Drift: decrement", ({ G, players }) => {
 }) // All we do here is wait until it escapes the while loop.
 
 // // TODO: how to test Drift 0 (stable) ?
+
+test<GameTestContext>("Card: ")
