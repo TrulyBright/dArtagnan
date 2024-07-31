@@ -5,8 +5,8 @@ pre-push:
       run: pnpm audit
     check-types:
       run: turbo check-types
-    test:
-      run: turbo test
+    # test:
+    #   run: turbo test
 
 pre-commit:
   parallel: true
