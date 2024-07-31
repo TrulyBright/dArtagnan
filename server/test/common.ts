@@ -12,7 +12,7 @@ const unameGen = (): Username => {
 
 export const uGen = () => new User(unameGen())
 
-export const createExpectRecvd = (receivers: Listening<Event>[]) => {
+export const createExpector = (receivers: Listening<Event>[]) => {
     type R = (typeof receivers)[number]
     const spies = receivers.map(r => ({
         receiver: r,
@@ -23,7 +23,15 @@ export const createExpectRecvd = (receivers: Listening<Event>[]) => {
     const getRecvCnt = (r: R) => ++recvCnts.find(c => c.receiver === r)!.count
     const expectRecvd = (r: R, e: Event) =>
         expect(spy(r)).toHaveBeenNthCalledWith(getRecvCnt(r), e)
-    return expectRecvd
+    const clearExpector = (r: R) => {
+        recvCnts.find(c => c.receiver === r)!.count = 0
+        spies.find(s => s.receiver === r)!.spy.mockClear()
+    }
+    return {
+        expectRecvd: expectRecvd,
+        clearExpector: clearExpector,
+    }
 }
 
-export type RecvExpector = ReturnType<typeof createExpectRecvd>
+export type RecvExpector = ReturnType<typeof createExpector>["expectRecvd"]
+export type ClearExpector = ReturnType<typeof createExpector>["clearExpector"]

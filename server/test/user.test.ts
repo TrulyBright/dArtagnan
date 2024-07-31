@@ -10,7 +10,7 @@ import {
     RoomFull,
     Unstartable,
 } from "@dartagnan/api/error"
-import { createExpectRecvd, RecvExpector, uGen } from "#test/common"
+import { createExpector, RecvExpector, uGen } from "#test/common"
 import { User } from "#user"
 
 type UserTestContext = {
@@ -22,7 +22,7 @@ type UserTestContext = {
 beforeEach<UserTestContext>(async context => {
     context.H = new Hub()
     context.users = Array.from({ length: 100 }, uGen)
-    context.expectRecvd = createExpectRecvd(context.users)
+    context.expectRecvd = createExpector(context.users).expectRecvd
 })
 
 test<UserTestContext>("User creates, enters, speaks in, and leaves a room", ({

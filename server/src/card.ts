@@ -66,6 +66,7 @@ const SRun: CardStrategy = (p: Player) => {
     p.deposit(taken)
     p.game.setStakes(p.game.stakes - taken)
     p.unseat()
+    // TODO: end turn
 }
 
 const SDonation: CardStrategy = (p: Player) => {

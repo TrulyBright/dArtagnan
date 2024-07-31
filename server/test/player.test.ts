@@ -14,16 +14,26 @@ import {
     Stakes,
     PlayerDrewCard,
     YourCard,
+    CardPlayed,
+    TurnOrder,
 } from "@dartagnan/api/event"
 import { beforeEach, expect, test, vi } from "vitest"
-import { createExpectRecvd, RecvExpector } from "./common"
+import { ClearExpector, createExpector, RecvExpector } from "./common"
 import { dispatchCmd } from "#action"
-import { Mediation } from "@dartagnan/api/card"
+import {
+    Destroy,
+    Donation,
+    Mediation,
+    Reverse,
+    Sharpshooter,
+} from "@dartagnan/api/card"
+import { randomCard } from "#card"
 
 type GameTestContext = {
     G: Game
     players: Player[]
     expectRecvd: RecvExpector
+    clearExpector: ClearExpector
 }
 
 beforeEach<GameTestContext>(async context => {
@@ -43,7 +53,9 @@ beforeEach<GameTestContext>(async context => {
     }
     context.G = G
     context.players = players
-    context.expectRecvd = createExpectRecvd(players)
+    const { expectRecvd, clearExpector } = createExpector(players)
+    context.expectRecvd = expectRecvd
+    context.clearExpector = clearExpector
     expect(G.state).toBe("Idle")
     G.start()
     expect(G.state).toBe("BetSetup")
@@ -115,6 +127,12 @@ test<GameTestContext>("Game overall", ({ G, players, expectRecvd }) => {
                 expect(drawing.bankrupt).toBe(
                     originalBalance[drawing.index] <= G.bet,
                 )
+                if (G.seated.length === 1) {
+                    expect(G.state).toBe("RoundCeremony")
+                    for (const p of players)
+                        expectRecvd(p, new RoundWinner(G.seated[0]))
+                    break
+                }
                 continue
             }
             const shooter = G.currentPlayer!
@@ -268,6 +286,84 @@ test<GameTestContext>("Drift: decrement", ({ G, players }) => {
         G.drawCard(G.currentPlayer!)
 }) // All we do here is wait until it escapes the while loop.
 
-// // TODO: how to test Drift 0 (stable) ?
+// TODO: how to test Drift 0 (stable) ?
 
-test<GameTestContext>("Card: ")
+test<GameTestContext>(`Card: ${Sharpshooter.tag}`, ({
+    G,
+    players,
+    expectRecvd,
+    clearExpector,
+}) => {
+    G.setBet(0)
+    const playing = G.currentPlayer!
+    playing.setAccuracy(Player.ACCURACY_MIN)
+    expect(playing.accuracy).not.toBe(Sharpshooter.accuracy)
+    playing.getCard(Sharpshooter)
+    for (const p of players) clearExpector(p)
+    G.playCard(playing)
+    expectRecvd(playing, new YourCard(null))
+    for (const p of players) expectRecvd(p, new CardPlayed(Sharpshooter))
+    expect(playing.accuracy).toBe(Sharpshooter.accuracy)
+    for (const p of players) expectRecvd(p, new PlayerStatus(playing))
+})
+
+test<GameTestContext>(`Card: ${Reverse.tag}`, ({
+    G,
+    players,
+    expectRecvd,
+    clearExpector,
+}) => {
+    G.setBet(0)
+    const originalOrder = G.turnOrder
+    const reversed: Game["turnOrder"] = originalOrder === 1 ? -1 : 1
+    const playing = G.currentPlayer!
+    const whoOriginallyPlaysNext = G.whoPlaysNext
+    const theOtherSide =
+        G.seated[
+            (G.seated.indexOf(playing)! + reversed + G.seated.length) %
+                G.seated.length
+        ]
+    playing.getCard(Reverse)
+    for (const p of players) clearExpector(p)
+    G.playCard(playing)
+    expectRecvd(playing, new YourCard(null))
+    expect(G.turnOrder).toBe(reversed)
+    for (const p of players) {
+        expectRecvd(p, new CardPlayed(Reverse))
+        expectRecvd(p, new TurnOrder(reversed))
+    }
+    expect(G.whoPlaysNext).not.toBe(whoOriginallyPlaysNext)
+    expect(G.whoPlaysNext).toBe(theOtherSide)
+    G.drawCard(playing)
+    expect(G.currentPlayer!).toBe(theOtherSide)
+})
+
+test<GameTestContext>(`Card: ${Donation.tag}`, ({ G }) => {
+    G.setBet(0)
+    const playing = G.currentPlayer!
+    playing.getCard(Donation)
+    const originalBalance = playing.balance
+    const spy = vi.spyOn(playing, "deposit")
+    G.playCard(playing)
+    expect(playing.balance).toBe(originalBalance + Donation.amount)
+    expect(spy).toHaveBeenCalledWith(Donation.amount)
+})
+
+test<GameTestContext>(`Card: ${Destroy.tag}`, ({
+    G,
+    players,
+    expectRecvd,
+    clearExpector,
+}) => {
+    G.setBet(0)
+    for (const p of players) p.getCard(randomCard())
+    const playing = G.currentPlayer!
+    playing.getCard(Destroy)
+    for (const p of players) clearExpector(p)
+    G.playCard(playing)
+    expectRecvd(playing, new YourCard(null)) // play hence null.
+    for (const p of players) {
+        expectRecvd(p, new CardPlayed(Destroy))
+        expectRecvd(p, new YourCard(null))
+    }
+})

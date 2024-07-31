@@ -83,7 +83,9 @@ export class Game implements GameBase {
         if (this.state === "BetSetup") return this.currentPlayer
         if (this.currentPlayer.buff.LastDitch) return this.currentPlayer
         const i = this.seated.indexOf(this.currentPlayer)
-        return this.seated[(i + this.turnOrder) % this.seated.length]
+        return this.seated[
+            (i + this.turnOrder + this.seated.length) % this.seated.length
+        ]
     }
     randomSeated(except: Player | null): Player {
         const pool = this.seated.filter(p => p !== except)
