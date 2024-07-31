@@ -15,5 +15,5 @@ jobs:
       with:
         run_install: |
           - recursive: true
-            args: [ -g ]
+            args: [ -g, turbo ]
     - run: turbo test
