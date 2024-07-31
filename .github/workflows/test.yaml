@@ -5,15 +5,15 @@ jobs:
     runs-on: ubuntu-latest
     env:
         SHELL: bash
+        PNPM_HOME: 
     steps:
     - uses: actions/checkout@v4
     - uses: actions/setup-node@v4
       with:
         node-version: 22
-    - run: |
-        npm i -g pnpm
-        pnpm setup
-        source ~/.bashrc
-        pnpm i
-        pnpm i -g turbo
-        turbo test
+    - run: npm i -g pnpm
+    - run: pnpm setup
+    - run: source ~/.bashrc
+    - run: pnpm i
+    - run: pnpm i -g turbo
+    - run: turbo test
