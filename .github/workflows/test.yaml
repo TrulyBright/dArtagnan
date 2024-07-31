@@ -4,16 +4,14 @@ jobs:
   test:
     runs-on: ubuntu-latest
     env:
-        SHELL: bash
-        PNPM_HOME: 
+      SHELL: bash
     steps:
     - uses: actions/checkout@v4
     - uses: actions/setup-node@v4
+    - uses: pnpm/actions-setup@v4
       with:
-        node-version: 22
-    - run: npm i -g pnpm
-    - run: pnpm setup
-    - run: source ~/.bashrc
-    - run: pnpm i
-    - run: pnpm i -g turbo
+        run_install: true
+    - uses: pnpm/actions-setup@v4
+      with:
+        run_install: i -g turbo
     - run: turbo test
