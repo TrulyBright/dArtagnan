@@ -22,6 +22,7 @@ import { ClearExpector, createExpector, RecvExpector } from "./common"
 import { dispatchCmd } from "#action"
 import {
     Bulletproof,
+    Curse,
     Destroy,
     Donation,
     Insurance,
@@ -439,4 +440,15 @@ test<GameTestContext>(`Card: ${Bulletproof.tag}`, ({ G }) => {
     G.shoot(shooting, shot)
     expect(shot.seated).toBe(true)
     expect(shot.buff.Bulletproof).toBe(false)
+})
+
+test<GameTestContext>(`Card: ${Curse.tag}`, ({ G }) => {
+    G.setBet(0)
+    const cursing = G.currentPlayer!
+    const cursed = G.whoPlaysNext
+    cursing.getCard(Curse)
+    G.playCard(cursing)
+    expect(cursed.accuracy).not.toBe(Curse.accuracy)
+    G.shoot(cursing, cursed)
+    expect(cursed.accuracy).toBe(Curse.accuracy)
 })
