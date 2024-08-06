@@ -21,7 +21,7 @@ const SInsurance: CardStrategy = (p: Player) => {
     p.withdraw(Insurance.premium)
     p.setBuff(Insurance)
     if (p.bankrupt) {
-        p.unseat()
+        p.unseat() // unseat() itself fires Insurance.
         p.game.turnDone()
     }
 }

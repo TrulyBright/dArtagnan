@@ -21,6 +21,7 @@ import { beforeEach, expect, test, vi } from "vitest"
 import { ClearExpector, createExpector, RecvExpector } from "./common"
 import { dispatchCmd } from "#action"
 import {
+    Bulletproof,
     Destroy,
     Donation,
     Insurance,
@@ -401,15 +402,26 @@ test<GameTestContext>(`Card: ${Insurance.tag}`, ({
     expectRecvd,
     clearExpector,
 }) => {
-    G.setBet(0)
+    G.setBet(G.defaultBetAmount)
     const playing = G.currentPlayer!
     const spyWithdraw = vi.spyOn(playing, "withdraw")
     const spyDeposit = vi.spyOn(playing, "deposit")
+    const originalBalance = playing.balance
     playing.getCard(Insurance)
     G.playCard(playing)
     expect(spyWithdraw).toHaveBeenNthCalledWith(1, Insurance.premium)
     G.drawCard(playing)
     G.currentPlayer!.accuracy = 1
     G.shoot(G.currentPlayer!, playing)
+    expect(playing.seated).toBe(false)
     expect(spyDeposit).toHaveBeenNthCalledWith(1, Insurance.payout)
+    expect(playing.balance).toBe(
+        originalBalance -
+            Insurance.premium -
+            G.bet - // bet
+            G.bet + // loot
+            Insurance.payout,
+    )
 })
+
+// test<GameTestContext>(`Card: ${Bulletproof}`)
