@@ -25,6 +25,7 @@ import {
     Donation,
     Mediation,
     Reverse,
+    Run,
     Sharpshooter,
 } from "@dartagnan/api/card"
 import { randomCard } from "#card"
@@ -366,4 +367,29 @@ test<GameTestContext>(`Card: ${Destroy.tag}`, ({
         expectRecvd(p, new CardPlayed(Destroy))
         expectRecvd(p, new YourCard(null))
     }
+})
+
+test<GameTestContext>(`Card: ${Run.tag}`, ({
+    G,
+    players,
+    expectRecvd,
+    clearExpector,
+}) => {
+    G.setBet(G.defaultBetAmount)
+    G.drawCard(G.currentPlayer!)
+    G.currentPlayer!.getCard(Run)
+    for (const p of players) clearExpector(p)
+    const running = G.currentPlayer!
+    const originalStakes = G.stakes
+    const originalBalance = running.balance
+    G.playCard(running)
+    expectRecvd(running, new YourCard(null))
+    for (const p of players) {
+        expectRecvd(p, new CardPlayed(Run))
+        expectRecvd(p, new PlayerStatus(running))
+    }
+    expect(G.seated).not.include(running)
+    const taken = Math.floor(originalStakes * Run.share)
+    expect(running.balance).toBe(originalBalance + taken)
+    expect(G.stakes).toBe(originalStakes - taken)
 })

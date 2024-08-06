@@ -140,7 +140,7 @@ export class Game implements GameBase {
     turnDone() {
         if (this.state !== "Turn") return
         if (this.currentPlayer === null) throw new Error("No current player")
-        if (this.seated.length !== 1) {
+        if (this.seated.length !== 1 && this.currentPlayer.seated) {
             this.setStakes(this.stakes + this.currentPlayer.withdraw(this.bet))
             if (this.currentPlayer.bankrupt) this.currentPlayer.unseat()
         }
