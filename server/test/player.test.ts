@@ -424,4 +424,19 @@ test<GameTestContext>(`Card: ${Insurance.tag}`, ({
     )
 })
 
-// test<GameTestContext>(`Card: ${Bulletproof}`)
+test<GameTestContext>(`Card: ${Bulletproof.tag}`, ({ G }) => {
+    G.setBet(0)
+    const shot = G.currentPlayer!
+    const shooting = G.whoPlaysNext
+    const originalBalance = shot.balance
+    const spyWithdraw = vi.spyOn(shot, "withdraw")
+    shot.getCard(Bulletproof)
+    G.playCard(shot)
+    expect(spyWithdraw).toHaveBeenNthCalledWith(1, Bulletproof.cost)
+    expect(shot.balance).toBe(originalBalance - Bulletproof.cost)
+    G.drawCard(shot)
+    shooting.accuracy = 1
+    G.shoot(shooting, shot)
+    expect(shot.seated).toBe(true)
+    expect(shot.buff.Bulletproof).toBe(false)
+})
