@@ -23,6 +23,7 @@ import { dispatchCmd } from "#action"
 import {
     Destroy,
     Donation,
+    Insurance,
     Mediation,
     Reverse,
     Run,
@@ -392,4 +393,23 @@ test<GameTestContext>(`Card: ${Run.tag}`, ({
     const taken = Math.floor(originalStakes * Run.share)
     expect(running.balance).toBe(originalBalance + taken)
     expect(G.stakes).toBe(originalStakes - taken)
+})
+
+test<GameTestContext>(`Card: ${Insurance.tag}`, ({
+    G,
+    players,
+    expectRecvd,
+    clearExpector,
+}) => {
+    G.setBet(0)
+    const playing = G.currentPlayer!
+    const spyWithdraw = vi.spyOn(playing, "withdraw")
+    const spyDeposit = vi.spyOn(playing, "deposit")
+    playing.getCard(Insurance)
+    G.playCard(playing)
+    expect(spyWithdraw).toHaveBeenNthCalledWith(1, Insurance.premium)
+    G.drawCard(playing)
+    G.currentPlayer!.accuracy = 1
+    G.shoot(G.currentPlayer!, playing)
+    expect(spyDeposit).toHaveBeenNthCalledWith(1, Insurance.payout)
 })

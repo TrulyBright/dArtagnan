@@ -18,11 +18,11 @@ import type { Player } from "#player"
 type CardStrategy = (p: Player) => void
 
 const SInsurance: CardStrategy = (p: Player) => {
-    p.withdraw(Insurance.payout)
+    p.withdraw(Insurance.premium)
     p.setBuff(Insurance)
     if (p.bankrupt) {
         p.unseat()
-        // TODO: to next turn
+        p.game.turnDone()
     }
 }
 
@@ -31,7 +31,7 @@ const SBulletproof: CardStrategy = (p: Player) => {
     p.setBuff(Bulletproof)
     if (p.bankrupt) {
         p.unseat()
-        // TODO: to next turn
+        p.game.turnDone()
     }
 }
 
@@ -75,9 +75,7 @@ const SDonation: CardStrategy = (p: Player) => {
 
 const SDestroy: CardStrategy = (p: Player) => {
     if (!p.game) return
-    for (const s of p.game.seated) {
-        s.loseCard()
-    }
+    for (const s of p.game.seated) s.loseCard()
 }
 
 export const dispatchCardStrategy = (c: Card): CardStrategy => {
