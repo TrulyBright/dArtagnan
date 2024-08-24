@@ -13,8 +13,7 @@
             "cache": false
         },
         "test": {
-            "dependsOn": ["^test"],
-            "cache": false
+            "dependsOn": ["^test"]
         },
         "check-types": {
             "dependsOn": ["^check-types"]
