@@ -26,6 +26,7 @@ import {
     Destroy,
     Donation,
     Insurance,
+    LastDitch,
     Mediation,
     Reverse,
     Robbery,
@@ -474,4 +475,17 @@ test<GameTestContext>(`Card: ${Robbery.tag}`, ({ G }) => {
             (robbed.buff.Insurance ? Insurance.payout : 0),
     )
     expect(robbing.buff.Robbery).toBe(false)
+})
+
+test<GameTestContext>(`Card: ${LastDitch.tag}`, ({ G }) => {
+    G.setBet(G.defaultBetAmount)
+    const ditching = G.currentPlayer!
+    const originalAccuracy = ditching.accuracy
+    expect(originalAccuracy).toBeGreaterThan(LastDitch.penalty) // it can result in intended failure.
+    ditching.getCard(LastDitch)
+    G.playCard(ditching)
+    expect(ditching.buff.LastDitch).toBe(true)
+    expect(ditching.accuracy).toBe(originalAccuracy - LastDitch.penalty)
+    G.shoot(ditching, G.whoPlaysNext)
+    expect(G.currentPlayer).toBe(ditching)
 })
