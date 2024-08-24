@@ -13,7 +13,7 @@ importers:
         version: 1.7.2
       turbo:
         specifier: latest
-        version: 2.0.6
+        version: 2.0.14
 
   api:
     devDependencies:
@@ -22,22 +22,25 @@ importers:
         version: 1.8.3
       '@swc/cli':
         specifier: latest
-        version: 0.4.0(@swc/core@1.7.0-nightly-20240713.1)(chokidar@3.6.0)
+        version: 0.4.0(@swc/core@1.7.18)(chokidar@3.6.0)
       '@swc/core':
         specifier: latest
-        version: 1.7.0-nightly-20240713.1
+        version: 1.7.18
       chokidar:
         specifier: latest
         version: 3.6.0
       typescript:
         specifier: latest
-        version: 5.5.3
+        version: 5.5.4
 
   server:
     dependencies:
       '@dartagnan/api':
         specifier: workspace:*
         version: link:../api
+      micromatch:
+        specifier: ^4.0.8
+        version: 4.0.8
       ws:
         specifier: ^8.18.0
         version: 8.18.0
@@ -47,13 +50,13 @@ importers:
         version: 1.8.3
       '@swc/cli':
         specifier: latest
-        version: 0.4.0(@swc/core@1.7.0-nightly-20240713.1)(chokidar@3.6.0)
+        version: 0.4.0(@swc/core@1.7.18)(chokidar@3.6.0)
       '@swc/core':
         specifier: latest
-        version: 1.7.0-nightly-20240713.1
+        version: 1.7.18
       '@swc/jest':
         specifier: latest
-        version: 0.2.36(@swc/core@1.7.0-nightly-20240713.1)
+        version: 0.2.36(@swc/core@1.7.18)
       '@types/ws':
         specifier: ^8.5.10
         version: 8.5.10
@@ -62,7 +65,7 @@ importers:
         version: 3.6.0
       typescript:
         specifier: latest
-        version: 5.5.3
+        version: 5.5.4
       vitest:
         specifier: ^2.0.2
         version: 2.0.2(@types/node@20.14.10)
@@ -408,68 +411,68 @@ packages:
       chokidar:
         optional: true
 
-  '@swc/core-darwin-arm64@1.7.0-nightly-20240713.1':
-    resolution: {integrity: sha512-6yTOfKdk20Qv/tVOPgB9+hJHVYrcGhykZvP8zCNrVCOHhbd9WZsSSXTyoUUa4SzX7jSE0/mLVM/6DRq/8dURJQ==}
+  '@swc/core-darwin-arm64@1.7.18':
+    resolution: {integrity: sha512-MwLc5U+VGPMZm8MjlFBjEB2wyT1EK0NNJ3tn+ps9fmxdFP+PL8EpMiY1O1F2t1ydy2OzBtZz81sycjM9RieFBg==}
     engines: {node: '>=10'}
     cpu: [arm64]
     os: [darwin]
 
-  '@swc/core-darwin-x64@1.7.0-nightly-20240713.1':
-    resolution: {integrity: sha512-S/7PFi3b+7t62gqfEsA9DxU9ADQ2KMruWJeivqAlzRSWq1/jfVBJuPTePcVLEPoaWTJQHHbyOYqNaH7oxjBj5Q==}
+  '@swc/core-darwin-x64@1.7.18':
+    resolution: {integrity: sha512-IkukOQUw7/14VkHp446OkYGCZEHqZg9pTmTdBawlUyz2JwZMSn2VodCl7aFSdGCsU4Cwni8zKA8CCgkCCAELhw==}
     engines: {node: '>=10'}
     cpu: [x64]
     os: [darwin]
 
-  '@swc/core-linux-arm-gnueabihf@1.7.0-nightly-20240713.1':
-    resolution: {integrity: sha512-LOypUZnE/z3ETx0eT5dzQX7lHkrcp+oIKzf/Cg9mP5kXl11xwXryyicynEFtxi05zItb/J7bTt0otGcOpY4uHA==}
+  '@swc/core-linux-arm-gnueabihf@1.7.18':
+    resolution: {integrity: sha512-ATnb6jJaBeXCqrTUawWdoOy7eP9SCI7UMcfXlYIMxX4otKKspLPAEuGA5RaNxlCcj9ObyO0J3YGbtZ6hhD2pjg==}
     engines: {node: '>=10'}
     cpu: [arm]
     os: [linux]
 
-  '@swc/core-linux-arm64-gnu@1.7.0-nightly-20240713.1':
-    resolution: {integrity: sha512-W4mGkf65SLl7+h2J0uWnyK2vGMSl9tZkXkWmvf8LFRhCLKL6GTQJJbGaG6k+VgapCc0hJxX33xrclW5OrLcP6A==}
+  '@swc/core-linux-arm64-gnu@1.7.18':
+    resolution: {integrity: sha512-poHtH7zL7lEp9K2inY90lGHJABWxURAOgWNeZqrcR5+jwIe7q5KBisysH09Zf/JNF9+6iNns+U0xgWTNJzBuGA==}
     engines: {node: '>=10'}
     cpu: [arm64]
     os: [linux]
 
-  '@swc/core-linux-arm64-musl@1.7.0-nightly-20240713.1':
-    resolution: {integrity: sha512-aDDPvPy8VLEu48+yklo90VJnRmpwETSsbEGcM0RbcwPKoSZClnUmGp4FNCw/FPzFB6I2LCGJG/DiclOV3K8U7A==}
+  '@swc/core-linux-arm64-musl@1.7.18':
+    resolution: {integrity: sha512-qnNI1WmcOV7Wz1ZDyK6WrOlzLvJ01rnni8ec950mMHWkLRMP53QvCvhF3S+7gFplWBwWJTOOPPUqJp/PlSxWyQ==}
     engines: {node: '>=10'}
     cpu: [arm64]
     os: [linux]
 
-  '@swc/core-linux-x64-gnu@1.7.0-nightly-20240713.1':
-    resolution: {integrity: sha512-wfNXW4DuHKOzipWP1lbMc+gUBuzl2SQYHk/Tmrw6/eTc7Ms4cFRVr9y5aSW++z4OZAXOpSrN6QhjRr3eegBQkw==}
+  '@swc/core-linux-x64-gnu@1.7.18':
+    resolution: {integrity: sha512-x9SCqCLzwtlqtD5At3I1a7Gco+EuXnzrJGoucmkpeQohshHuwa+cskqsXO6u1Dz0jXJEuHbBZB9va1wYYfjgFg==}
     engines: {node: '>=10'}
     cpu: [x64]
     os: [linux]
 
-  '@swc/core-linux-x64-musl@1.7.0-nightly-20240713.1':
-    resolution: {integrity: sha512-+ljaemq8+mVAdT4u1gdBr93lk6CFf1N2mB+ahLHYY6hwjGAqcMPHEwrfPNLQIJl00wAn4/BBVgEhcK4ZPKdtEA==}
+  '@swc/core-linux-x64-musl@1.7.18':
+    resolution: {integrity: sha512-qtj8iOpMMgKjzxTv+islmEY0JBsbd93nka0gzcTTmGZxKtL5jSUsYQvkxwNPZr5M9NU1fgaR3n1vE6lFmtY0IQ==}
     engines: {node: '>=10'}
     cpu: [x64]
     os: [linux]
 
-  '@swc/core-win32-arm64-msvc@1.7.0-nightly-20240713.1':
-    resolution: {integrity: sha512-ZXWVmSQAJ74rS/v+GftG3n2HieX3NXLIhE7f/CujHPi5fjno8jlbZfNfDiqAbJzshl89oORcM9xbLbdDVLjTlg==}
+  '@swc/core-win32-arm64-msvc@1.7.18':
+    resolution: {integrity: sha512-ltX/Ol9+Qu4SXmISCeuwVgAjSa8nzHTymknpozzVMgjXUoZMoz6lcynfKL1nCh5XLgqh0XNHUKLti5YFF8LrrA==}
     engines: {node: '>=10'}
     cpu: [arm64]
     os: [win32]
 
-  '@swc/core-win32-ia32-msvc@1.7.0-nightly-20240713.1':
-    resolution: {integrity: sha512-SYPXur5CvqvQUSq4xH1WuSaNou+3vBoQyzYNTLtIZybNLeeIcnGALQzZ3AyXtbFpaW9DpJTStDNB0f5HpmZ70g==}
+  '@swc/core-win32-ia32-msvc@1.7.18':
+    resolution: {integrity: sha512-RgTcFP3wgyxnQbTCJrlgBJmgpeTXo8t807GU9GxApAXfpLZJ3swJ2GgFUmIJVdLWyffSHF5BEkF3FmF6mtH5AQ==}
     engines: {node: '>=10'}
     cpu: [ia32]
     os: [win32]
 
-  '@swc/core-win32-x64-msvc@1.7.0-nightly-20240713.1':
-    resolution: {integrity: sha512-EZnO+QbYii/+bGnDLLduUI0zXRKhK/qSARNdpjWyozE8SMcda1fiPNSGNM+fJIf/30Xs3HbTGYjgax5nq/FaNQ==}
+  '@swc/core-win32-x64-msvc@1.7.18':
+    resolution: {integrity: sha512-XbZ0wAgzR757+DhQcnv60Y/bK9yuWPhDNRQVFFQVRsowvK3+c6EblyfUSytIidpXgyYFzlprq/9A9ZlO/wvDWw==}
     engines: {node: '>=10'}
     cpu: [x64]
     os: [win32]
 
-  '@swc/core@1.7.0-nightly-20240713.1':
-    resolution: {integrity: sha512-PWwTWepyCw61fvVWsB7WvoOCsqFibRIPEDLNdBUPe6cEvaUqyMhKrI2qyy4dWLG5j64iQIAMnSc+Eaxy+Xu2EQ==}
+  '@swc/core@1.7.18':
+    resolution: {integrity: sha512-qL9v5N5S38ijmqiQRvCFUUx2vmxWT/JJ2rswElnyaHkOHuVoAFhBB90Ywj4RKjh3R0zOjhEcemENTyF3q3G6WQ==}
     engines: {node: '>=10'}
     peerDependencies:
       '@swc/helpers': '*'
@@ -486,8 +489,8 @@ packages:
     peerDependencies:
       '@swc/core': '*'
 
-  '@swc/types@0.1.9':
-    resolution: {integrity: sha512-qKnCno++jzcJ4lM4NTfYifm1EFSCeIfKiAHAfkENZAV5Kl9PjJIyd2yeeVv6c/2CckuLyv2NmRC5pv6pm2WQBg==}
+  '@swc/types@0.1.12':
+    resolution: {integrity: sha512-wBJA+SdtkbFhHjTMYH+dEH1y4VpfGdAc2Kw/LK09i9bXd/K6j6PkDcFCEzb6iVfZMkPRrl/q0e3toqTAJdkIVA==}
 
   '@szmarczak/http-timer@4.0.6':
     resolution: {integrity: sha512-4BAffykYOgO+5nzBWYwE3W90sBgLJoUPRWWcL8wlyiM8IB8ipJz3UMJ9KXQd1RKQXpKp8Tutn80HZtWsu2u76w==}
@@ -904,8 +907,8 @@ packages:
     resolution: {integrity: sha512-8q7VEgMJW4J8tcfVPy8g09NcQwZdbwFEqhe/WZkoIzjn/3TGDwtOCYtXGxA3O8tPzpczCCDgv+P2P5y00ZJOOg==}
     engines: {node: '>= 8'}
 
-  micromatch@4.0.7:
-    resolution: {integrity: sha512-LPP/3KorzCwBxfeUuZmaR6bG2kdeHSbe0P2tY3FLRU4vYrjYz5hI4QZwV0njUx3jeuKe67YukQ1LSPZBKDqO/Q==}
+  micromatch@4.0.8:
+    resolution: {integrity: sha512-PXwfBhYu0hBCPw8Dn0E+WDYb7af3dSLVWKi3HGv84IdF4TyFoC0ysxFd0Goxw7nSv4T/PzEJQxsYsEiFCKo2BA==}
     engines: {node: '>=8.6'}
 
   mime-db@1.52.0:
@@ -1200,42 +1203,42 @@ packages:
     resolution: {integrity: sha512-QUHBFTJGdOwmp0tbOG505xAgOp/YliZP/6UgafFXYZ26WT1bvQmSMJUvkeVSASuJJHbqsFbynTvkd5W8RBTipg==}
     engines: {node: '>=12'}
 
-  turbo-darwin-64@2.0.6:
-    resolution: {integrity: sha512-XpgBwWj3Ggmz/gQVqXdMKXHC1iFPMDiuwugLwSzE7Ih0O13JuNtYZKhQnopvbDQnFQCeRq2Vsm5OTWabg/oB/g==}
+  turbo-darwin-64@2.0.14:
+    resolution: {integrity: sha512-kwfDmjNwlNfvtrvT29+ZBg5n1Wvxl891bFHchMJyzMoR0HOE9N1NSNdSZb9wG3e7sYNIu4uDkNk+VBEqJW0HzQ==}
     cpu: [x64]
     os: [darwin]
 
-  turbo-darwin-arm64@2.0.6:
-    resolution: {integrity: sha512-RfeZYXIAkiA21E8lsvfptGTqz/256YD+eI1x37fedfvnHFWuIMFZGAOwJxtZc6QasQunDZ9TRRREbJNI68tkIw==}
+  turbo-darwin-arm64@2.0.14:
+    resolution: {integrity: sha512-m3LXYEshCx3wc4ZClM6gb01KYpFmtjQ9IBF3A7ofjb6ahux3xlYZJZ3uFCLAGHuvGLuJ3htfiPbwlDPTdknqqw==}
     cpu: [arm64]
     os: [darwin]
 
-  turbo-linux-64@2.0.6:
-    resolution: {integrity: sha512-92UDa0xNQQbx0HdSp9ag3YSS3xPdavhc7q9q9mxIAcqyjjD6VElA4Y85m4F/DDGE5SolCrvBz2sQhVmkOd6Caw==}
+  turbo-linux-64@2.0.14:
+    resolution: {integrity: sha512-7vBzCPdoTtR92SNn2JMgj1FlMmyonGmpMaQdgAB1OVYtuQ6NVGoh7/lODfaILqXjpvmFSVbpBIDrKOT6EvcprQ==}
     cpu: [x64]
     os: [linux]
 
-  turbo-linux-arm64@2.0.6:
-    resolution: {integrity: sha512-eQKu6utCVUkIH2kqOzD8OS6E0ba6COjWm6PRDTNCHQRljZW503ycaTUIdMOiJrVg1MkEjDyOReUg8s8D18aJ4Q==}
+  turbo-linux-arm64@2.0.14:
+    resolution: {integrity: sha512-jwH+c0bfjpBf26K/tdEFatmnYyXwGROjbr6bZmNcL8R+IkGAc/cglL+OToqJnQZTgZvH7uDGbeSyUo7IsHyjuA==}
     cpu: [arm64]
     os: [linux]
 
-  turbo-windows-64@2.0.6:
-    resolution: {integrity: sha512-+9u4EPrpoeHYCQ46dRcou9kbkSoelhOelHNcbs2d86D6ruYD/oIAHK9qgYK8LeARRz0jxhZIA/dWYdYsxJJWkw==}
+  turbo-windows-64@2.0.14:
+    resolution: {integrity: sha512-w9/XwkHSzvLjmioo6cl3S1yRfI6swxsV1j1eJwtl66JM4/pn0H2rBa855R0n7hZnmI6H5ywLt/nLt6Ae8RTDmw==}
     cpu: [x64]
     os: [win32]
 
-  turbo-windows-arm64@2.0.6:
-    resolution: {integrity: sha512-rdrKL+p+EjtdDVg0wQ/7yTbzkIYrnb0Pw4IKcjsy3M0RqUM9UcEi67b94XOAyTa5a0GqJL1+tUj2ebsFGPgZbg==}
+  turbo-windows-arm64@2.0.14:
+    resolution: {integrity: sha512-XaQlyYk+Rf4xS5XWCo8XCMIpssgGGy8blzLfolN6YBp4baElIWMlkLZHDbGyiFmCbNf9I9gJI64XGRG+LVyyjA==}
     cpu: [arm64]
     os: [win32]
 
-  turbo@2.0.6:
-    resolution: {integrity: sha512-/Ftmxd5Mq//a9yMonvmwENNUN65jOVTwhhBPQjEtNZutYT9YKyzydFGLyVM1nzhpLWahQSMamRc/RDBv5EapzA==}
+  turbo@2.0.14:
+    resolution: {integrity: sha512-00JjdCMD/cpsjP0Izkjcm8Oaor5yUCfDwODtaLb+WyblyadkaDEisGhy3Dbd5az9n+5iLSPiUgf+WjPbns6MRg==}
     hasBin: true
 
-  typescript@5.5.3:
-    resolution: {integrity: sha512-/hreyEujaB0w76zKo6717l3L0o/qEUtRgdvUBvlkhoWeOVMjMuHNHk0BRBzikzuGDqNmPQbg5ifMEqsHLiIUcQ==}
+  typescript@5.5.4:
+    resolution: {integrity: sha512-Mtq29sKDAEYP7aljRgtPOpTvOfbwRWlS6dPRzwjdE+C0R4brX/GUyhHSecbHMFLNBLcJIPt9nl9yG5TZ1weH+Q==}
     engines: {node: '>=14.17'}
     hasBin: true
 
@@ -1555,10 +1558,10 @@ snapshots:
 
   '@sindresorhus/is@4.6.0': {}
 
-  '@swc/cli@0.4.0(@swc/core@1.7.0-nightly-20240713.1)(chokidar@3.6.0)':
+  '@swc/cli@0.4.0(@swc/core@1.7.18)(chokidar@3.6.0)':
     dependencies:
       '@mole-inc/bin-wrapper': 8.0.1
-      '@swc/core': 1.7.0-nightly-20240713.1
+      '@swc/core': 1.7.18
       '@swc/counter': 0.1.3
       commander: 8.3.0
       fast-glob: 3.3.2
@@ -1570,62 +1573,62 @@ snapshots:
     optionalDependencies:
       chokidar: 3.6.0
 
-  '@swc/core-darwin-arm64@1.7.0-nightly-20240713.1':
+  '@swc/core-darwin-arm64@1.7.18':
     optional: true
 
-  '@swc/core-darwin-x64@1.7.0-nightly-20240713.1':
+  '@swc/core-darwin-x64@1.7.18':
     optional: true
 
-  '@swc/core-linux-arm-gnueabihf@1.7.0-nightly-20240713.1':
+  '@swc/core-linux-arm-gnueabihf@1.7.18':
     optional: true
 
-  '@swc/core-linux-arm64-gnu@1.7.0-nightly-20240713.1':
+  '@swc/core-linux-arm64-gnu@1.7.18':
     optional: true
 
-  '@swc/core-linux-arm64-musl@1.7.0-nightly-20240713.1':
+  '@swc/core-linux-arm64-musl@1.7.18':
     optional: true
 
-  '@swc/core-linux-x64-gnu@1.7.0-nightly-20240713.1':
+  '@swc/core-linux-x64-gnu@1.7.18':
     optional: true
 
-  '@swc/core-linux-x64-musl@1.7.0-nightly-20240713.1':
+  '@swc/core-linux-x64-musl@1.7.18':
     optional: true
 
-  '@swc/core-win32-arm64-msvc@1.7.0-nightly-20240713.1':
+  '@swc/core-win32-arm64-msvc@1.7.18':
     optional: true
 
-  '@swc/core-win32-ia32-msvc@1.7.0-nightly-20240713.1':
+  '@swc/core-win32-ia32-msvc@1.7.18':
     optional: true
 
-  '@swc/core-win32-x64-msvc@1.7.0-nightly-20240713.1':
+  '@swc/core-win32-x64-msvc@1.7.18':
     optional: true
 
-  '@swc/core@1.7.0-nightly-20240713.1':
+  '@swc/core@1.7.18':
     dependencies:
       '@swc/counter': 0.1.3
-      '@swc/types': 0.1.9
+      '@swc/types': 0.1.12
     optionalDependencies:
-      '@swc/core-darwin-arm64': 1.7.0-nightly-20240713.1
-      '@swc/core-darwin-x64': 1.7.0-nightly-20240713.1
-      '@swc/core-linux-arm-gnueabihf': 1.7.0-nightly-20240713.1
-      '@swc/core-linux-arm64-gnu': 1.7.0-nightly-20240713.1
-      '@swc/core-linux-arm64-musl': 1.7.0-nightly-20240713.1
-      '@swc/core-linux-x64-gnu': 1.7.0-nightly-20240713.1
-      '@swc/core-linux-x64-musl': 1.7.0-nightly-20240713.1
-      '@swc/core-win32-arm64-msvc': 1.7.0-nightly-20240713.1
-      '@swc/core-win32-ia32-msvc': 1.7.0-nightly-20240713.1
-      '@swc/core-win32-x64-msvc': 1.7.0-nightly-20240713.1
+      '@swc/core-darwin-arm64': 1.7.18
+      '@swc/core-darwin-x64': 1.7.18
+      '@swc/core-linux-arm-gnueabihf': 1.7.18
+      '@swc/core-linux-arm64-gnu': 1.7.18
+      '@swc/core-linux-arm64-musl': 1.7.18
+      '@swc/core-linux-x64-gnu': 1.7.18
+      '@swc/core-linux-x64-musl': 1.7.18
+      '@swc/core-win32-arm64-msvc': 1.7.18
+      '@swc/core-win32-ia32-msvc': 1.7.18
+      '@swc/core-win32-x64-msvc': 1.7.18
 
   '@swc/counter@0.1.3': {}
 
-  '@swc/jest@0.2.36(@swc/core@1.7.0-nightly-20240713.1)':
+  '@swc/jest@0.2.36(@swc/core@1.7.18)':
     dependencies:
       '@jest/create-cache-key-function': 29.7.0
-      '@swc/core': 1.7.0-nightly-20240713.1
+      '@swc/core': 1.7.18
       '@swc/counter': 0.1.3
       jsonc-parser: 3.3.1
 
-  '@swc/types@0.1.9':
+  '@swc/types@0.1.12':
     dependencies:
       '@swc/counter': 0.1.3
 
@@ -1922,7 +1925,7 @@ snapshots:
       '@nodelib/fs.walk': 1.2.8
       glob-parent: 5.1.2
       merge2: 1.4.1
-      micromatch: 4.0.7
+      micromatch: 4.0.8
 
   fastq@1.17.1:
     dependencies:
@@ -2084,7 +2087,7 @@ snapshots:
 
   merge2@1.4.1: {}
 
-  micromatch@4.0.7:
+  micromatch@4.0.8:
     dependencies:
       braces: 3.0.3
       picomatch: 2.3.1
@@ -2330,34 +2333,34 @@ snapshots:
     dependencies:
       escape-string-regexp: 5.0.0
 
-  turbo-darwin-64@2.0.6:
+  turbo-darwin-64@2.0.14:
     optional: true
 
-  turbo-darwin-arm64@2.0.6:
+  turbo-darwin-arm64@2.0.14:
     optional: true
 
-  turbo-linux-64@2.0.6:
+  turbo-linux-64@2.0.14:
     optional: true
 
-  turbo-linux-arm64@2.0.6:
+  turbo-linux-arm64@2.0.14:
     optional: true
 
-  turbo-windows-64@2.0.6:
+  turbo-windows-64@2.0.14:
     optional: true
 
-  turbo-windows-arm64@2.0.6:
+  turbo-windows-arm64@2.0.14:
     optional: true
 
-  turbo@2.0.6:
+  turbo@2.0.14:
     optionalDependencies:
-      turbo-darwin-64: 2.0.6
-      turbo-darwin-arm64: 2.0.6
-      turbo-linux-64: 2.0.6
-      turbo-linux-arm64: 2.0.6
-      turbo-windows-64: 2.0.6
-      turbo-windows-arm64: 2.0.6
+      turbo-darwin-64: 2.0.14
+      turbo-darwin-arm64: 2.0.14
+      turbo-linux-64: 2.0.14
+      turbo-linux-arm64: 2.0.14
+      turbo-windows-64: 2.0.14
+      turbo-windows-arm64: 2.0.14
 
-  typescript@5.5.3: {}
+  typescript@5.5.4: {}
 
   undici-types@5.26.5: {}
 
