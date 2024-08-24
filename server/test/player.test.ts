@@ -28,6 +28,7 @@ import {
     Insurance,
     Mediation,
     Reverse,
+    Robbery,
     Run,
     Sharpshooter,
 } from "@dartagnan/api/card"
@@ -397,12 +398,7 @@ test<GameTestContext>(`Card: ${Run.tag}`, ({
     expect(G.stakes).toBe(originalStakes - taken)
 })
 
-test<GameTestContext>(`Card: ${Insurance.tag}`, ({
-    G,
-    players,
-    expectRecvd,
-    clearExpector,
-}) => {
+test<GameTestContext>(`Card: ${Insurance.tag}`, ({ G }) => {
     G.setBet(G.defaultBetAmount)
     const playing = G.currentPlayer!
     const spyWithdraw = vi.spyOn(playing, "withdraw")
@@ -446,9 +442,36 @@ test<GameTestContext>(`Card: ${Curse.tag}`, ({ G }) => {
     G.setBet(0)
     const cursing = G.currentPlayer!
     const cursed = G.whoPlaysNext
+    cursed.setBuff(Mediation)
+    cursed.setDrift(0)
     cursing.getCard(Curse)
     G.playCard(cursing)
+    expect(cursing.buff.Curse).toBe(true)
     expect(cursed.accuracy).not.toBe(Curse.accuracy)
     G.shoot(cursing, cursed)
     expect(cursed.accuracy).toBe(Curse.accuracy)
+    expect(cursing.buff.Curse).toBe(false)
+})
+
+test<GameTestContext>(`Card: ${Robbery.tag}`, ({ G }) => {
+    G.setBet(G.defaultBetAmount)
+    const robbing = G.currentPlayer!
+    const robbed = G.whoPlaysNext
+    const originalBalanceRobbing = robbing.balance
+    const originalBalanceRobbed = robbed.balance
+    robbing.getCard(Robbery)
+    G.playCard(robbing)
+    expect(robbing.buff.Robbery).toBe(true)
+    robbing.accuracy = 1
+    G.shoot(robbing, robbed)
+    expect(robbed.seated).toBe(false)
+    expect(robbing.balance).toBe(
+        originalBalanceRobbing + G.bet * Robbery.multiplier - G.bet,
+    )
+    expect(robbed.balance).toBe(
+        originalBalanceRobbed -
+            G.bet * Robbery.multiplier +
+            (robbed.buff.Insurance ? Insurance.payout : 0),
+    )
+    expect(robbing.buff.Robbery).toBe(false)
 })
