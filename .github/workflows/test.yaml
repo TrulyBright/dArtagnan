@@ -15,4 +15,7 @@ jobs:
       with:
         run_install: |
           args: [ -g, turbo ]
+    - run: |
+        pnpm exec playwright install-deps
+        pnpm exec playwright install
     - run: turbo test
