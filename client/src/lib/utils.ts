@@ -25,3 +25,15 @@ export const whichSprite = (index: number, count: number) => {
         default: return index
     }
 }
+
+export const calculatePositions = (centerX: number, centerY: number, count: number) => {
+    const positions = []
+    const radius = 100
+    for (let i = 0; i < count; i++) {
+        const angle = (2 * Math.PI / count) * i + Math.PI / 2
+        const x = centerX + radius * Math.cos(angle)
+        const y = centerY + radius * Math.sin(angle)
+        positions.push({ x, y })
+    }
+    return positions
+}

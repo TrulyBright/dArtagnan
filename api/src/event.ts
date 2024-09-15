@@ -3,107 +3,114 @@ import type { GameBase } from "#game"
 import type { PlayerBase } from "#player"
 import type { UserBase } from "#user"
 
-export class UserSpoke {
-    constructor(
-        readonly message: string,
-        readonly user: UserBase,
-    ) {}
+export type UserSpoke = {
+    readonly tag: "UserSpoke"
+    readonly message: string
+    readonly user: UserBase
 }
 
-export class UserEntered {
-    constructor(readonly user: UserBase) {}
+export type UserEntered = {
+    readonly tag: "UserEntered"
+    readonly user: UserBase
 }
 
-export class NewHost {
-    constructor(readonly host: UserBase) {}
+export type NewHost = {
+    readonly tag: "NewHost"
+    readonly host: UserBase
 }
 
-export class UserLeft {
-    constructor(readonly user: UserBase) {}
+export type UserLeft = {
+    readonly tag: "UserLeft"
+    readonly user: UserBase
 }
 
-export class NowTurnOf {
-    constructor(readonly player: PlayerBase) {}
+export type NowTurnOf = {
+    readonly tag: "NowTurnOf"
+    readonly player: PlayerBase
 }
 
-export class NewRound {
-    constructor(readonly round: number) {}
+export type NewRound = {
+    readonly tag: "NewRound"
+    readonly round: number
 }
 
-export class BetSetupStart {
-    constructor(readonly player: PlayerBase) {}
+export type BetSetupStart = {
+    readonly tag: "BetSetupStart"
+    readonly player: PlayerBase
 }
 
-export class BetSetupDone {
-    constructor(readonly bet: number) {}
+export type BetSetupDone = {
+    readonly tag: "BetSetupDone"
+    readonly bet: number
 }
 
-export class PlayerShot {
-    constructor(
-        readonly shooter: PlayerBase,
-        readonly target: PlayerBase,
-    ) {}
+export type PlayerShot = {
+    readonly tag: "PlayerShot"
+    readonly shooter: PlayerBase
+    readonly target: PlayerBase
 }
 
-export class PlayerStatus {
-    constructor(readonly player: PlayerBase) {}
+export type PlayerStatus = {
+    readonly tag: "PlayerStatus"
+    readonly player: PlayerBase
 }
 
-export class YourCard {
-    constructor(readonly card: Card | null) {}
+export type YourCard = {
+    readonly tag: "YourCard"
+    readonly card: Card | null
 }
 
-export class PlayerDrewCard {
-    constructor(readonly player: PlayerBase) {}
+export type PlayerDrewCard = {
+    readonly tag: "PlayerDrewCard"
+    readonly player: PlayerBase
 }
 
-export class Countdown {
-    constructor(
-        readonly full: number,
-        readonly remain: number,
-    ) {}
+export type Countdown = {
+    readonly tag: "Countdown"
+    readonly full: number
+    readonly remain: number
 }
 
-export class RoundWinner {
-    constructor(readonly player: PlayerBase) {}
+export type RoundWinner = {
+    readonly tag: "RoundWinner"
+    readonly player: PlayerBase
 }
 
-export class GameOver {}
-
-export class TurnOrder {
-    constructor(readonly order: GameBase["turnOrder"]) {}
+export type GameOver = {
+    readonly tag: "GameOver"
 }
 
-export class CardPlayed {
-    constructor(readonly card: Card) {}
+export type TurnOrder = {
+    readonly tag: "TurnOrder"
+    readonly order: GameBase["turnOrder"]
 }
 
-export class Stakes {
-    constructor(readonly stakes: number) {}
+export type CardPlayed = {
+    readonly tag: "CardPlayed"
+    readonly card: Card
 }
 
-const userEvents = [UserSpoke, UserEntered, UserLeft, NewHost] as const
+export type Stakes = {
+    readonly tag: "Stakes"
+    readonly stakes: number
+}
 
-const playerEvents = [
-    NewRound,
-    NowTurnOf,
-    BetSetupStart,
-    BetSetupDone,
-    PlayerShot,
-    YourCard,
-    PlayerDrewCard,
-    Countdown,
-    RoundWinner,
-    GameOver,
-    TurnOrder,
-    CardPlayed,
-    Stakes,
-] as const
-
-const events = [...userEvents, ...playerEvents] as const
-
-export type UserEvent = InstanceType<(typeof userEvents)[number]>
-
-export type PlayerEvent = InstanceType<(typeof playerEvents)[number]>
-
-export type Event = UserEvent | PlayerEvent
+export type Event =
+    | UserSpoke
+    | UserEntered
+    | NewHost
+    | UserLeft
+    | NowTurnOf
+    | NewRound
+    | BetSetupStart
+    | BetSetupDone
+    | PlayerShot
+    | PlayerStatus
+    | YourCard
+    | PlayerDrewCard
+    | Countdown
+    | RoundWinner
+    | GameOver
+    | TurnOrder
+    | CardPlayed
+    | Stakes

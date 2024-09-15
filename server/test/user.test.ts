@@ -2,7 +2,6 @@ import { beforeEach, test, expect } from "vitest"
 import { Hub } from "#hub"
 import { CodeRegex } from "@dartagnan/api/code"
 import { Room } from "#room"
-import { NewHost, UserEntered, UserLeft, UserSpoke } from "@dartagnan/api/event"
 import { dispatchCmd } from "#action"
 import {
     NeedToBeHost,
@@ -33,8 +32,8 @@ test<UserTestContext>("User creates, enters, speaks in, and leaves a room", ({
     // Create
     const host = users[0]
     H.addUser(host, null)
-    expectRecvd(host, new UserEntered(host))
-    expectRecvd(host, new NewHost(host))
+    expectRecvd(host, { tag: "UserEntered", user: host })
+    expectRecvd(host, { tag: "NewHost", host: host })
     const room = host.room!
     expect(room).not.toBeNull()
     expect(room.users).toEqual([host])
@@ -47,7 +46,8 @@ test<UserTestContext>("User creates, enters, speaks in, and leaves a room", ({
         .slice(0, Room.MAX_MEMBERS - room.users.length)
     for (const g of guests) {
         H.addUser(g, room.code)
-        for (const o of room.users) expectRecvd(o, new UserEntered(g))
+        for (const o of room.users)
+            expectRecvd(o, { tag: "UserEntered", user: g })
         const msg = g.name + "speaks!"
         const cmd = dispatchCmd({
             tag: "Speak",
@@ -55,7 +55,8 @@ test<UserTestContext>("User creates, enters, speaks in, and leaves a room", ({
         })
         if (!cmd.isUserCmd) throw new Error("CSpeak not usercmd")
         cmd.exec(g)
-        for (const o of room.users) expectRecvd(o, new UserSpoke(msg, g))
+        for (const o of room.users)
+            expectRecvd(o, { tag: "UserSpoke", message: msg, user: g })
     }
     expect(room.full).toBe(true)
     const latecomer = uGen()
@@ -64,8 +65,8 @@ test<UserTestContext>("User creates, enters, speaks in, and leaves a room", ({
     for (const leaver of room.users.slice()) {
         H.removeUser(leaver)
         for (const remaining of room.users) {
-            expectRecvd(remaining, new UserLeft(leaver))
-            expectRecvd(remaining, new NewHost(room.users[0]))
+            expectRecvd(remaining, { tag: "UserLeft", user: leaver })
+            expectRecvd(remaining, { tag: "NewHost", host: room.users[0] })
         }
     }
     expect(room.empty).toBe(true)

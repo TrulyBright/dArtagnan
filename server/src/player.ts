@@ -1,6 +1,5 @@
 import { type Buff, type Card, Insurance } from "@dartagnan/api/card"
 import { type Drift, randomDrift } from "@dartagnan/api/drift"
-import { PlayerDrewCard, PlayerStatus, YourCard } from "@dartagnan/api/event"
 import type { Event } from "@dartagnan/api/event"
 import type { PlayerBase } from "@dartagnan/api/player"
 import { BuffResetLiteral, randomCard } from "#card"
@@ -22,7 +21,7 @@ const broadcastStatus = (
     const original = descriptor.value
     descriptor.value = function (this: Player, ...args: unknown[]) {
         const result = original.apply(this, args)
-        this.game.broadcast(new PlayerStatus(this))
+        this.game.broadcast({ tag: "PlayerStatus", player: this })
         return result
     }
     return descriptor
@@ -64,12 +63,12 @@ export class Player extends Listening<Event> implements PlayerBase {
     }
     getCard(c: Card) {
         this.card = c
-        this.recv(new YourCard(c))
-        this.game.broadcast(new PlayerDrewCard(this))
+        this.recv({ tag: "YourCard", card: c })
+        this.game.broadcast({ tag: "PlayerDrewCard", player: this })
     }
     loseCard() {
         this.card = null
-        this.recv(new YourCard(null))
+        this.recv({ tag: "YourCard", card: null })
     }
     @broadcastStatus
     unseat() {

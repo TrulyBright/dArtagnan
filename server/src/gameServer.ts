@@ -1,4 +1,3 @@
-import type { Action } from "@dartagnan/api/action"
 import { isCode } from "@dartagnan/api/code"
 import { isUsername } from "@dartagnan/api/user"
 import type { WebSocketServer } from "ws"

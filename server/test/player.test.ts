@@ -1,22 +1,6 @@
 import { Game } from "#game"
 import { Player } from "#player"
 import { Room } from "#room"
-import {
-    GameOver,
-    BetSetupDone,
-    BetSetupStart,
-    Countdown,
-    NewRound,
-    NowTurnOf,
-    PlayerShot,
-    PlayerStatus,
-    RoundWinner,
-    Stakes,
-    PlayerDrewCard,
-    YourCard,
-    CardPlayed,
-    TurnOrder,
-} from "@dartagnan/api/event"
 import { beforeEach, expect, test, vi } from "vitest"
 import { ClearExpector, createExpector, RecvExpector } from "./common"
 import { dispatchCmd } from "#action"
@@ -71,16 +55,18 @@ test<GameTestContext>("Game overall", ({ G, players, expectRecvd }) => {
     for (let roundIndex = 1; roundIndex <= G.maxRound; roundIndex++) {
         expect(G.round).toBe(roundIndex)
         for (const p of players) {
-            expectRecvd(p, new NewRound(G.round))
-            expectRecvd(p, new Stakes(0))
+            expectRecvd(p, { tag: "NewRound", round: G.round })
+            expectRecvd(p, { tag: "Stakes", stakes: 0 })
             // players are reset.
-            for (const other of players) expectRecvd(p, new PlayerStatus(other))
+            for (const other of players)
+                expectRecvd(p, { tag: "PlayerStatus", player: other })
         }
         expect(G.state).toBe("BetSetup")
         expect(G.currentPlayer).not.toBeNull()
         const betSetter = G.currentPlayer!
         if (G.round === 1) expect(G.currentPlayer).toBe(betSetter)
-        for (const p of players) expectRecvd(p, new BetSetupStart(betSetter))
+        for (const p of players)
+            expectRecvd(p, { tag: "BetSetupStart", player: betSetter })
         for (
             let elapsed = 0;
             elapsed <= Game.timeLimit;
@@ -88,14 +74,15 @@ test<GameTestContext>("Game overall", ({ G, players, expectRecvd }) => {
         ) {
             vi.runOnlyPendingTimers()
             for (const p of players)
-                expectRecvd(
-                    p,
-                    new Countdown(Game.timeLimit, Game.timeLimit - elapsed),
-                )
+                expectRecvd(p, {
+                    tag: "Countdown",
+                    full: Game.timeLimit,
+                    remain: Game.timeLimit - elapsed,
+                })
         }
         // bet set timeout.
         for (const p of players)
-            expectRecvd(p, new BetSetupDone(G.defaultBetAmount))
+            expectRecvd(p, { tag: "BetSetupDone", bet: G.defaultBetAmount })
         expect(G.currentPlayer).toBe(betSetter)
         let willShoot = true
         do {
@@ -104,9 +91,12 @@ test<GameTestContext>("Game overall", ({ G, players, expectRecvd }) => {
             expect(G.state).toBe("Turn")
             for (const p of players) {
                 for (const other of G.seated)
-                    expectRecvd(p, new PlayerStatus(other)) // accuracy is set.
-                expectRecvd(p, new NowTurnOf(G.currentPlayer!))
-                expectRecvd(p, new PlayerStatus(G.currentPlayer!)) // LastDitch is reset.
+                    expectRecvd(p, { tag: "PlayerStatus", player: other }) // accuracy is set.
+                expectRecvd(p, { tag: "NowTurnOf", player: G.currentPlayer! })
+                expectRecvd(p, {
+                    tag: "PlayerStatus",
+                    player: G.currentPlayer!,
+                }) // LastDitch is reset.
             }
             const originalBalance: Record<Player["index"], Player["balance"]> =
                 Object.assign(
@@ -116,19 +106,18 @@ test<GameTestContext>("Game overall", ({ G, players, expectRecvd }) => {
             if (!willShoot) {
                 const drawing = G.currentPlayer!
                 G.drawCard(drawing)
-                expectRecvd(drawing, new YourCard(drawing.card))
+                expectRecvd(drawing, { tag: "YourCard", card: drawing.card })
                 for (const p of players) {
-                    expectRecvd(p, new PlayerDrewCard(drawing))
-                    expectRecvd(p, new PlayerStatus(drawing)) // withdraw
-                    expectRecvd(
-                        p,
-                        new Stakes(
+                    expectRecvd(p, { tag: "PlayerDrewCard", player: drawing })
+                    expectRecvd(p, { tag: "PlayerStatus", player: drawing }) // withdraw
+                    expectRecvd(p, {
+                        tag: "Stakes",
+                        stakes:
                             stakes +
-                                Math.min(originalBalance[drawing.index], G.bet),
-                        ),
-                    )
+                            Math.min(originalBalance[drawing.index], G.bet),
+                    })
                     if (drawing.bankrupt)
-                        expectRecvd(p, new PlayerStatus(drawing))
+                        expectRecvd(p, { tag: "PlayerStatus", player: drawing })
                 }
                 expect(drawing.bankrupt).toBe(
                     originalBalance[drawing.index] <= G.bet,
@@ -136,7 +125,10 @@ test<GameTestContext>("Game overall", ({ G, players, expectRecvd }) => {
                 if (G.seated.length === 1) {
                     expect(G.state).toBe("RoundCeremony")
                     for (const p of players)
-                        expectRecvd(p, new RoundWinner(G.seated[0]))
+                        expectRecvd(p, {
+                            tag: "RoundWinner",
+                            player: G.seated[0],
+                        })
                     break
                 }
                 continue
@@ -155,14 +147,19 @@ test<GameTestContext>("Game overall", ({ G, players, expectRecvd }) => {
             ) {
                 vi.runOnlyPendingTimers()
                 for (const p of players)
-                    expectRecvd(
-                        p,
-                        new Countdown(Game.timeLimit, Game.timeLimit - elapsed),
-                    )
+                    expectRecvd(p, {
+                        tag: "Countdown",
+                        full: Game.timeLimit,
+                        remain: Game.timeLimit - elapsed,
+                    })
             }
             // shoot at random player on timeout
             for (const p of players)
-                expectRecvd(p, new PlayerShot(shooter, target))
+                expectRecvd(p, {
+                    tag: "PlayerShot",
+                    shooter: shooter,
+                    target: target,
+                })
             expect(loot).toBeGreaterThan(0)
             let expectedShooterBalance: number
             let expectedTargetBalance: number
@@ -194,10 +191,10 @@ test<GameTestContext>("Game overall", ({ G, players, expectRecvd }) => {
                 expect(targetWithdrawSpy).toHaveBeenNthCalledWith(1, G.bet)
                 expect(shooterDepositSpy).toHaveBeenNthCalledWith(1, loot)
                 for (const p of players) {
-                    expectRecvd(p, new PlayerStatus(target)) // withdraw
-                    expectRecvd(p, new PlayerStatus(shooter)) // deposit
-                    expectRecvd(p, new PlayerStatus(shooter)) // lose robbery
-                    expectRecvd(p, new PlayerStatus(target)) // unseat
+                    expectRecvd(p, { tag: "PlayerStatus", player: target }) // withdraw
+                    expectRecvd(p, { tag: "PlayerStatus", player: shooter }) // deposit
+                    expectRecvd(p, { tag: "PlayerStatus", player: shooter }) // lose robbery
+                    expectRecvd(p, { tag: "PlayerStatus", player: target }) // unseat
                 }
                 expect(target.seated).toBe(false)
             }
@@ -206,7 +203,7 @@ test<GameTestContext>("Game overall", ({ G, players, expectRecvd }) => {
             if (G.seated.length === 1) {
                 expect(G.state).toBe("RoundCeremony")
                 for (const p of players)
-                    expectRecvd(p, new RoundWinner(G.seated[0]))
+                    expectRecvd(p, { tag: "RoundWinner", player: G.seated[0] })
             } else {
                 expect(shooterWithdrawSpy).toHaveBeenNthCalledWith(1, G.bet)
                 const maximum = Math.min(
@@ -215,10 +212,10 @@ test<GameTestContext>("Game overall", ({ G, players, expectRecvd }) => {
                 ) // failing
                 expect(G.stakes).toBe(stakes + maximum)
                 for (const p of players) {
-                    expectRecvd(p, new PlayerStatus(shooter)) // bet
-                    expectRecvd(p, new Stakes(G.stakes))
+                    expectRecvd(p, { tag: "PlayerStatus", player: shooter }) // bet
+                    expectRecvd(p, { tag: "Stakes", stakes: G.stakes })
                     if (shooter.bankrupt)
-                        expectRecvd(p, new PlayerStatus(shooter)) // unseat
+                        expectRecvd(p, { tag: "PlayerStatus", player: shooter }) // unseat
                     expect(shooter.seated).not.toBe(shooter.bankrupt)
                 }
             }
@@ -226,7 +223,7 @@ test<GameTestContext>("Game overall", ({ G, players, expectRecvd }) => {
         vi.runOnlyPendingTimers()
     }
     expect(G.state).toBe("GameOver")
-    for (const p of players) expectRecvd(p, new GameOver())
+    for (const p of players) expectRecvd(p, { tag: "GameOver" })
 })
 
 test<GameTestContext>("Designated BetSetup", ({ G, players }) => {
@@ -307,10 +304,12 @@ test<GameTestContext>(`Card: ${Sharpshooter.tag}`, ({
     playing.getCard(Sharpshooter)
     for (const p of players) clearExpector(p)
     G.playCard(playing)
-    expectRecvd(playing, new YourCard(null))
-    for (const p of players) expectRecvd(p, new CardPlayed(Sharpshooter))
+    expectRecvd(playing, { tag: "YourCard", card: null })
+    for (const p of players)
+        expectRecvd(p, { tag: "CardPlayed", card: Sharpshooter })
     expect(playing.accuracy).toBe(Sharpshooter.accuracy)
-    for (const p of players) expectRecvd(p, new PlayerStatus(playing))
+    for (const p of players)
+        expectRecvd(p, { tag: "PlayerStatus", player: playing })
 })
 
 test<GameTestContext>(`Card: ${Reverse.tag}`, ({
@@ -332,11 +331,11 @@ test<GameTestContext>(`Card: ${Reverse.tag}`, ({
     playing.getCard(Reverse)
     for (const p of players) clearExpector(p)
     G.playCard(playing)
-    expectRecvd(playing, new YourCard(null))
+    expectRecvd(playing, { tag: "YourCard", card: null })
     expect(G.turnOrder).toBe(reversed)
     for (const p of players) {
-        expectRecvd(p, new CardPlayed(Reverse))
-        expectRecvd(p, new TurnOrder(reversed))
+        expectRecvd(p, { tag: "CardPlayed", card: Reverse })
+        expectRecvd(p, { tag: "TurnOrder", order: reversed })
     }
     expect(G.whoPlaysNext).not.toBe(whoOriginallyPlaysNext)
     expect(G.whoPlaysNext).toBe(theOtherSide)
@@ -367,10 +366,10 @@ test<GameTestContext>(`Card: ${Destroy.tag}`, ({
     playing.getCard(Destroy)
     for (const p of players) clearExpector(p)
     G.playCard(playing)
-    expectRecvd(playing, new YourCard(null)) // play hence null.
+    expectRecvd(playing, { tag: "YourCard", card: null }) // play hence null.
     for (const p of players) {
-        expectRecvd(p, new CardPlayed(Destroy))
-        expectRecvd(p, new YourCard(null))
+        expectRecvd(p, { tag: "CardPlayed", card: Destroy })
+        expectRecvd(p, { tag: "YourCard", card: null })
     }
 })
 
@@ -388,10 +387,10 @@ test<GameTestContext>(`Card: ${Run.tag}`, ({
     const originalStakes = G.stakes
     const originalBalance = running.balance
     G.playCard(running)
-    expectRecvd(running, new YourCard(null))
+    expectRecvd(running, { tag: "YourCard", card: null })
     for (const p of players) {
-        expectRecvd(p, new CardPlayed(Run))
-        expectRecvd(p, new PlayerStatus(running))
+        expectRecvd(p, { tag: "CardPlayed", card: Run })
+        expectRecvd(p, { tag: "PlayerStatus", player: running })
     }
     expect(G.seated).not.include(running)
     const taken = Math.floor(originalStakes * Run.share)
