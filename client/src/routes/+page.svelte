@@ -1,23 +1,10 @@
-<script context="module">
+<script context="module" lang="ts">
     import UserComponent from "$lib/components/user.svelte"
+    import { calculatePositions } from "$lib/utils"
 </script>
 <script lang="ts">
     let userCount = 0
-    $: positions = calculatePositions(userCount)
-
-    const calculatePositions = (count: number) => {
-        const positions = []
-        const radius = 100
-        const centerX = 200
-        const centerY = 200
-        for (let i = 0; i < count; i++) {
-            const angle = (2 * Math.PI / count) * i + Math.PI / 2
-            const x = centerX + radius * Math.cos(angle)
-            const y = centerY + radius * Math.sin(angle)
-            positions.push({ x, y })
-        }
-        return positions
-    }
+    $: positions = calculatePositions(200, 200, userCount)
 </script>
 
 <input type="number" bind:value={userCount} min="0" max="8" />
