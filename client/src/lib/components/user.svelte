@@ -45,6 +45,9 @@
         animation: play 2s steps(20) infinite;
     }
     @keyframes play {
+        /**
+            Don't use background-position. It's resource-intensive.
+        */
         to { transform: translateX(-100%); }
     }
 </style>
