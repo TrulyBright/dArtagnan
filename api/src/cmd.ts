@@ -32,6 +32,6 @@ export type SetDrift = {
     readonly drift: Drift
 }
 
-export type UserAction = Speak | StartGame
-export type PlayerAction = SetBet | Shoot | DrawCard | PlayCard | SetDrift
-export type Action = UserAction | PlayerAction
+export type UserCmd = Speak | StartGame
+export type PlayerCmd = SetBet | Shoot | DrawCard | PlayCard | SetDrift
+export type Cmd = UserCmd | PlayerCmd

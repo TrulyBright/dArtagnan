@@ -3,7 +3,7 @@ import { Player } from "#player"
 import { Room } from "#room"
 import { beforeEach, expect, test, vi } from "vitest"
 import { ClearExpector, createExpector, RecvExpector } from "./common"
-import { dispatchCmd } from "#action"
+import { attachExec } from "#cmd"
 import {
     Bulletproof,
     Curse,
@@ -229,7 +229,7 @@ test<GameTestContext>("Game overall", ({ G, players, expectRecvd }) => {
 test<GameTestContext>("Designated BetSetup", ({ G, players }) => {
     expect(G.state).toBe("BetSetup")
     const defaultBetAmount = G.bet
-    const cmd = dispatchCmd({
+    const cmd = attachExec({
         tag: "SetBet",
         amount: Math.floor(((G.betWindow[0] + G.betWindow[1]) * 2) / 3),
     })

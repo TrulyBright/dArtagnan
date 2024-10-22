@@ -14,7 +14,7 @@
         "#*": "./src/*.ts"
     },
     "exports": {
-        "./action": "./src/action.ts",
+        "./cmd": "./src/cmd.ts",
         "./code": "./src/code.ts",
         "./drift": "./src/drift.ts",
         "./error": "./src/error.ts",

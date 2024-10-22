@@ -2,7 +2,7 @@ import { beforeEach, test, expect } from "vitest"
 import { Hub } from "#hub"
 import { CodeRegex } from "@dartagnan/api/code"
 import { Room } from "#room"
-import { dispatchCmd } from "#action"
+import { attachExec } from "#cmd"
 import {
     NeedToBeHost,
     NoSuchRoom,
@@ -49,7 +49,7 @@ test<UserTestContext>("User creates, enters, speaks in, and leaves a room", ({
         for (const o of room.users)
             expectRecvd(o, { tag: "UserEntered", user: g })
         const msg = g.name + "speaks!"
-        const cmd = dispatchCmd({
+        const cmd = attachExec({
             tag: "Speak",
             message: msg,
         })
@@ -76,7 +76,7 @@ test<UserTestContext>("User creates, enters, speaks in, and leaves a room", ({
 })
 
 test<UserTestContext>("Host can start a game while guests cannot.", ({ H }) => {
-    const cmd = dispatchCmd({ tag: "StartGame" })
+    const cmd = attachExec({ tag: "StartGame" })
     if (!cmd.isUserCmd) throw new Error(`StartGame not isUserCmd`)
     const host = uGen()
     H.addUser(host, null)

@@ -1,7 +1,7 @@
 import { isCode } from "@dartagnan/api/code"
 import { isUsername } from "@dartagnan/api/user"
 import type { WebSocketServer } from "ws"
-import { dispatchCmd } from "#action"
+import { attachExec } from "#cmd"
 import type { Hub } from "#hub"
 import { User } from "#user"
 
@@ -20,7 +20,7 @@ export class GameServer {
             this.hub.addUser(user, code)
             ws.on("message", data => {
                 const parsed = JSON.parse(data.toString())
-                const cmd = dispatchCmd(parsed)
+                const cmd = attachExec(parsed)
                 if (cmd.isUserCmd) cmd.exec(user)
                 else if (user.player) cmd.exec(user.player)
             }).once("close", () => {
