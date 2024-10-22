@@ -515,15 +515,18 @@ packages:
 
   '@svelte-add/ast-manipulation@2.2.4':
     resolution: {integrity: sha512-232b8ii+jGq7lGl8LMmlG8wAq300RIxgT3lcnbfPOGyIttkjcYO6OvXVjHQoa9bnEU5veCByLyHO3nAwxlDrvA==}
+    deprecated: svelte-add has be merged together with create-svelte to become the Svelte CLI sv. The work continues in the sv repo over at https://github.com/sveltejs/cli
 
   '@svelte-add/ast-tooling@2.1.7':
     resolution: {integrity: sha512-oE1s51UUYQ+vxnjMZl2qKE4EbbZlG7SjtbZ290BIW2MBaFXvgtqLVOZDxqE1pgMzHNfw1tAtSLKLLY1w7AeELQ==}
+    deprecated: svelte-add has be merged together with create-svelte to become the Svelte CLI sv. The work continues in the sv repo over at https://github.com/sveltejs/cli
 
   '@svelte-add/config@1.5.2':
     resolution: {integrity: sha512-u5r4qMhpxvrffytROYWH0DpGfLhmpTtlhg4fH98guHBoCtupz5r1Sjjl2aRlckdLgRi2JgjHq6S+0QY/0Lg14w==}
 
   '@svelte-add/core@2.10.4':
     resolution: {integrity: sha512-DnrX9JQOIdZxdd7E6rFe0ASYwkfQXVJu7Kf7Z/RhBO/h2f4K3kWnVprZ7LVc4+XuLiSGvMaK6mthV3P7OdjQyA==}
+    deprecated: svelte-add has be merged together with create-svelte to become the Svelte CLI sv. The work continues in the sv repo over at https://github.com/sveltejs/cli
 
   '@sveltejs/adapter-auto@3.3.0':
     resolution: {integrity: sha512-EJZqY7eMM+bdbR898Xt9ufawUHLPJu7w3wPr4Cc+T1iIDf3fufVLWg4C71OluIqsdJqv85E4biKuHo3XXIY0PQ==}
