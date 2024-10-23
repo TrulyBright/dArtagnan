@@ -11,6 +11,7 @@
     $: usernameValid = UsernameRegex.test(username)
     $: roomCodeValid = CodeRegex.test(roomCode)
     $: valid = usernameValid && roomCodeValid
+    const joinRoom = () => window.location.href = `/room/${roomCode}?username=${username}`
 </script>
 <div class="flex w-fit max-w-sm flex-col gap-1.5">
     <Label for="username">Username</Label>
@@ -18,5 +19,5 @@
     <p class="text-muted-foreground text-sm">Username is up to 8 characters long.</p>
     <Label for="room-code">Room Code</Label>
     <Input type="text" id="room-code" placeholder="Room Code" pattern={CodeRegex.source} bind:value={roomCode} maxlength={8} required />
-    <Button disabled={!valid}>Play</Button>
+    <Button disabled={!valid} on:click={joinRoom}>Join</Button>
 </div>
