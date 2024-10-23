@@ -10,7 +10,7 @@
     export let userCount: number
     export let pos: [number, number]
     const U = new User(id, name, index)
-    $: image_url = `sprites/Idle${whichSprite(index, userCount)}.png`
+    $: image_url = `/sprites/Idle${whichSprite(index, userCount)}.png`
 </script>
 
 <div class="user" style="left: {pos[0]}%; top: {pos[1]}%;">
