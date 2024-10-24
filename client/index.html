@@ -1,0 +1,24 @@
+<!doctype html>
+<html lang="ko">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>d'Artagnan</title>
+  </head>
+  <body>
+    <div id="app" class="flex flex-col">
+      <div>
+        <h1>d'Artagnan</h1>
+        <p>Shoot to be the last one standing</p>
+      </div>
+      <p>1. Enter your username (≤8 characters):</p>
+      <input type="text" id="username" placeholder="username here..." maxlength="8" required />
+      <p>2. Enter the code of the room:</p>
+      <input type="text" id="room-code" placeholder="Enter the room code" maxlength="8" required />
+      <button type="button" id="join">Join</button>
+      <p>2-1. Or, create one:</p>
+      <button type="button" id="create">Create a room</button>
+    </div>
+    <script type="module" src="/src/index.ts"></script>
+  </body>
+</html>
