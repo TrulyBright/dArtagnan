@@ -1,8 +1,8 @@
 pre-push:
   parallel: true
   commands:
-    # packages-audit:
-    #   run: pnpm audit
+    packages-audit:
+      run: pnpm audit
     check-types:
       run: turbo check-types
     # test:
