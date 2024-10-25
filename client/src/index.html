@@ -6,29 +6,29 @@
     <title>d'Artagnan</title>
     <link rel="stylesheet" href="./style.css" />
   </head>
-  <body class="h-100 font-serif">
+  <body class="h-100">
     <div id="app" class="h-100">
-      <div class="my-1">
-        <h2 class="text-4xl text-center">d'Artagnan</h2>
-        <p class="text-sm text-center"><i>Shoot to be the last one standing</i></p>
+      <div class="my-5">
+        <h2 class="text-4xl text-center">달타냥</h2>
+        <p class="text-sm text-center"><i>빗맞혔다가…쏘세요!</i></p>
       </div>
       <div class="flex flex-col items-center my-1">
-        <label for="username">One: Enter your username.</label>
+        <label for="username" class="text-sm">1. 사용할 이름을 입력해주세요.</label>
         <input type="text" id="username" name="username"
-          class="block mt-2 rounded-md w-fit px-1" placeholder="username here..." maxlength="8" required>
+          class="block mt-2 rounded-md w-fit px-1" placeholder="이름" maxlength="8" required>
       </div>
       <div class="flex flex-col items-center my-1">
-        <label for="room-code">Two: Enter the code of the room.</label>
+        <label for="room-code" class="text-sm">2. 입장할 방의 코드를 입력해주세요.</label>
         <input type="text" id="room-code" name="room-code"
-          class="block mt-2 rounded-md w-fit px-1" placeholder="room code here..." maxlength="8" required>
+          class="block mt-2 rounded-md w-fit px-1" placeholder="방 코드" maxlength="8" required>
       </div>
       <div class="my-1">
-        <p>Three: Join it.</p>
-        <button type="button" id="join" class="disabled:opacity-75 disabled:cursor-not-allowed">Join</button>
+        <p class="text-sm">3. 입장합시다!</p>
+        <button type="button" id="join" class="disabled:opacity-75 disabled:cursor-not-allowed">입장</button>
       </div>
       <div class="my-1">
-        <p>Four: Or, create one.</p>
-        <button type="button" id="create" class="disabled:opacity-75 disabled:cursor-not-allowed">Create a room</button>
+        <p class="text-sm">4. 아니면, 방을 직접 만드세요.</p>
+        <button type="button" id="create" class="disabled:opacity-75 disabled:cursor-not-allowed">방 만들기</button>
       </div>
     </div>
     <script type="module" src="./index.ts"></script>
