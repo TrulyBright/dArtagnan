@@ -1,7 +1,5 @@
 import { UsernameRegex } from "@dartagnan/api/user"
 import { CodeRegex } from "@dartagnan/api/code"
-import './style.css'
-import './index.css'
 
 const usernameInput = document.querySelector<HTMLInputElement>("#username")!
 const roomCodeInput = document.querySelector<HTMLInputElement>("#room-code")!

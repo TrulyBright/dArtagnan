@@ -4,21 +4,23 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>d'Artagnan</title>
+    <link rel="stylesheet" href="./style.css" />
   </head>
   <body>
-    <div id="app" class="flex flex-col">
+    <div id="app" class="">
       <div>
-        <h1>d'Artagnan</h1>
-        <p>Shoot to be the last one standing</p>
+        <h2>d'Artagnan</h2>
+        Shoot to be the last one standing
       </div>
-      <p>1. Enter your username (≤8 characters):</p>
+      <p>1. Enter your username:</p>
       <input type="text" id="username" placeholder="username here..." maxlength="8" required />
       <p>2. Enter the code of the room:</p>
       <input type="text" id="room-code" placeholder="Enter the room code" maxlength="8" required />
+      <p>3. Join it.</p>
       <button type="button" id="join">Join</button>
-      <p>2-1. Or, create one:</p>
+      <p>4. Or, create one:</p>
       <button type="button" id="create">Create a room</button>
     </div>
-    <script type="module" src="/src/index.ts"></script>
+    <script type="module" src="./index.ts"></script>
   </body>
 </html>
