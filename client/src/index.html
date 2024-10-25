@@ -8,24 +8,28 @@
   </head>
   <body class="h-100 font-serif">
     <div id="app" class="h-100">
-      <div class="mb-3">
-        <h2 class="text-4xl">d'Artagnan</h2>
-        <p class="text-sm"><i>Shoot to be the last one standing</i></p>
+      <div class="my-1">
+        <h2 class="text-4xl text-center">d'Artagnan</h2>
+        <p class="text-sm text-center"><i>Shoot to be the last one standing</i></p>
       </div>
-      <div class="flex flex-col items-center">
+      <div class="flex flex-col items-center my-1">
         <label for="username">One: Enter your username.</label>
         <input type="text" id="username" name="username"
-          class="block my-2 rounded-md w-fit px-1" placeholder="username here..." maxlength="8" required>
+          class="block mt-2 rounded-md w-fit px-1" placeholder="username here..." maxlength="8" required>
       </div>
-      <div class="flex flex-col items-center">
+      <div class="flex flex-col items-center my-1">
         <label for="room-code">Two: Enter the code of the room.</label>
         <input type="text" id="room-code" name="room-code"
-          class="block my-2 rounded-md w-fit px-1" placeholder="room code here..." maxlength="8" required>
+          class="block mt-2 rounded-md w-fit px-1" placeholder="room code here..." maxlength="8" required>
       </div>
-      <p>Three: Join it.</p>
-      <button type="button" id="join" class="disabled:opacity-75 disabled:cursor-not-allowed">Join</button>
-      <p>Four: Or, create one.</p>
-      <button type="button" id="create" class="disabled:opacity-75 disabled:cursor-not-allowed">Create a room</button>
+      <div class="my-1">
+        <p>Three: Join it.</p>
+        <button type="button" id="join" class="disabled:opacity-75 disabled:cursor-not-allowed">Join</button>
+      </div>
+      <div class="my-1">
+        <p>Four: Or, create one.</p>
+        <button type="button" id="create" class="disabled:opacity-75 disabled:cursor-not-allowed">Create a room</button>
+      </div>
     </div>
     <script type="module" src="./index.ts"></script>
   </body>

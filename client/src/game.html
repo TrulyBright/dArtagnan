@@ -6,9 +6,32 @@
     <title>d'Artagnan</title>
     <link rel="stylesheet" href="./style.css" />
 </head>
-<body>
-    <div id="app" class="flex flex-col h-100">
-        <h2>Code: <span id="code"></span></h2>
+<body class="flex flex-col font-serif">
+    <div class="my-4">
+        <h2 class="text-4xl text-center">d'Artagnan</h2>
+        <p class="text-sm"><i>Shoot to be the last one standing</i></p>
+    </div>
+    <div>Code: <i id="code"></i></div>
+    <div id="circle" class="size-full grow border-2">Circle</div>
+    <div class="bottom-0 w-full">
+        <div class="flex flex-row">
+            <button type="button" class="grow">
+                <div>
+                    <p class="text-sm">Your accuracy tends to <i id="drift">increase.</i></p>
+                    <p class="text-xs">Click here to change.</p>
+                </div>
+            </button>
+            <button type="button" disabled class="grow disabled:opacity-75 disabled:cursor-not-allowed">
+                <div>
+                    <p class="text-sm">Play your card: <i id="current-card">Insurance</i></p>
+                    <p class="text-xs">Pay $10. Get $80 on death.</p>
+                </div>
+            </button>
+        </div>
+        <div class="flex">
+            <input type="text" class="w-full p-1 rounded-md" placeholder="Type your message here...">
+            <button type="submit" class="w-10 p-1 rounded-md">Send</buttton>
+        </div>
     </div>
     <script type="module" src="./game.ts"></script>
 </body>
