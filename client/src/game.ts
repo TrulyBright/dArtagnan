@@ -15,3 +15,6 @@ WS.onmessage = event => {
 WS.onerror = event => {
     console.error(event)
 }
+
+const codeDisplay = document.getElementById("code")!
+codeDisplay.textContent = code!
