@@ -36,7 +36,7 @@ const speak = () => {
                 </button>
             </div>
             <div class="flex">
-                <input type="text" class="grow p-1 rounded-md" placeholder="여기에 할 말 입력..." :value="message" maxlength="80" @input="e => message = e.target!.value" @keydown="onMessageInputEnter" />
+                <input type="text" class="grow p-1 rounded-md" placeholder="여기에 할 말 입력..." :value="message" maxlength="80" @input="e => message = (e.target as HTMLInputElement).value" @keydown="onMessageInputEnter" />
                 <button type="button" class="p-1 rounded-md" @click="speak">전송</button>
             </div>
         </div>

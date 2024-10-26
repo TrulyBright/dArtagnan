@@ -1,9 +1,9 @@
 <script setup lang="ts">
-import Title from '@/components/Title.vue'
+import TitleHeader from '@/components/TitleHeader.vue'
 </script>
 <template>
   <div class="mb-5">
-    <Title />
+    <TitleHeader />
   </div>
   <RouterView class="grow" />
 </template>
