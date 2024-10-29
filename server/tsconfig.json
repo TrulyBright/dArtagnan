@@ -6,4 +6,6 @@
         "moduleResolution": "Bundler",
         "experimentalDecorators": true,
     },
+    "include": ["src/**/*"],
+    "exclude": ["test/**/*"]
 }
