@@ -24,12 +24,5 @@
         "./room": "./src/room.ts",
         "./user": "./src/user.ts",
         "./card": "./src/card.ts"
-    },
-    "devDependencies": {
-        "@biomejs/biome": "1.8.3",
-        "@swc/cli": "latest",
-        "@swc/core": "latest",
-        "chokidar": "latest",
-        "typescript": "latest"
     }
 }

@@ -112,28 +112,21 @@ type CmdByTag<C extends Cmd> =
     C extends SetDrift ? CSetDrift :
     never
 
-export const attachExec = <T extends Cmd>(c: T): CmdByTag<T> => {
+export const attachExec = (c: Cmd): CmdByTag<typeof c> => {
     switch (c.tag) {
         case "Speak":
-            // @ts-expect-error
             return new CSpeak(c.message)
         case "StartGame":
-            // @ts-expect-error
             return new CStartGame()
         case "SetBet":
-            // @ts-expect-error
             return new CSetBet(c.amount)
         case "Shoot":
-            // @ts-expect-error
             return new CShoot(c.index)
         case "DrawCard":
-            // @ts-expect-error
             return new CDrawCard()
         case "PlayCard":
-            // @ts-expect-error
             return new CPlayCard()
         case "SetDrift":
-            // @ts-expect-error
             return new CSetDrift(c.drift)
     }
 }

@@ -2,8 +2,9 @@
 	"name": "@dartagnan/server",
 	"private": true,
 	"scripts": {
-		"dev": "npx swc --watch",
+		"dev": "nodemon --watch src --watch ../api/src --exec node -r @swc-node/register src/main.ts",
 		"build": "npx swc ./src -d ./dist",
+		"preview": "node -r @swc-node/register dist/src/main.js",
 		"clean": "rm -rf dist",
 		"test": "vitest run",
 		"test:watch": "vitest watch",
@@ -14,22 +15,17 @@
 	},
 	"dependencies": {
 		"@dartagnan/api": "workspace:*",
-		"@types/node": "^22.7.8",
-		"micromatch": "^4.0.8",
 		"ws": "^8.18.0"
-	},
-	"devDependencies": {
-		"@biomejs/biome": "1.8.3",
-		"@swc/cli": "latest",
-		"@swc/core": "latest",
-		"@swc/jest": "latest",
-		"@types/ws": "^8.5.10",
-		"chokidar": "latest",
-		"typescript": "latest",
-		"vitest": "^2.0.2"
 	},
 	"imports": {
 		"#*": "./src/*.ts",
 		"#test/*": "./test/*.ts"
+	},
+	"devDependencies": {
+		"@swc-node/register": "^1.10.9",
+		"@swc/cli": "0.4.1-nightly.20240914",
+		"@swc/core": "^1.7.40",
+		"@types/ws": "^8.5.12",
+		"nodemon": "^3.1.7"
 	}
 }
