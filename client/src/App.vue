@@ -5,5 +5,5 @@ import TitleHeader from '@/components/TitleHeader.vue'
   <div class="mb-5">
     <TitleHeader />
   </div>
-  <RouterView class="grow" />
+  <RouterView />
 </template>
