@@ -53,9 +53,9 @@ const toggleDrift = () => {
                     </div>
                 </button>
                 <button type="button" disabled class="w-50 text-xs break-keep disabled:opacity-75 disabled:cursor-not-allowed">
-                    <div  v-if="card">
-                        <p>누르면 <strong :class="cardColor">{{ cardLocale.name }}</strong> 카드를 사용합니다.</p>
-                        <p><strong :class="cardColor">{{ cardLocale.name }}</strong>: {{ cardLocale.description }}</p>
+                    <div v-if="card">
+                        <p>누르면 <strong :class="cardColor">{{ cardLocale?.name || card.tag }}</strong> 카드를 사용합니다.</p>
+                        <p><strong :class="cardColor">{{ cardLocale?.name || card.tag }}</strong>: {{ cardLocale?.description }}</p>
                     </div>
                     <p v-else>카드가 없습니다. 누르면 카드를 뽑습니다.</p>
                 </button>
