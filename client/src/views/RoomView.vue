@@ -17,7 +17,7 @@ const cardColor = computed(() => {
     if (!card.value) return undefined
     return `text-${colorOf(card.value)}-400`
 })
-const cardLocale = computed<CardLocale>(() => card.value ? locale.ko.card[card.value.tag] : null)
+const cardLocale = computed<CardLocale | null>(() => card.value ? locale.ko.card[card.value.tag] : null)
 
 const sendCmd = (c: Cmd) => WS.send(JSON.stringify(c))
 
