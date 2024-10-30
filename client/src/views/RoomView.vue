@@ -1,18 +1,31 @@
 <script setup lang="ts">
-import { computed, ref } from 'vue'
+import { computed, reactive, ref } from 'vue'
 import { type Drift } from "@dartagnan/api/drift"
+import { type Cmd } from "@dartagnan/api/cmd"
+
+const WS = reactive(new WebSocket(`ws://${location.host}/game`))
 
 const drift = ref<Drift>(0)
 const message = ref<string>('')
 const driftText = computed(() => drift.value === 1 ? "증가" : drift.value === -1 ? "감소" : "유지")
 const driftColor = computed(() => drift.value === 1 ? "text-green-400" : drift.value === -1 ? "text-red-400" : "text-yellow-400")
 
+const sendCmd = (c: Cmd) => WS.send(JSON.stringify(c))
+
 const onMessageInputEnter = (e: KeyboardEvent) => {
     if (e.key === "Enter" && !e.isComposing) speak()
 }
+const onMessageInput = (e: InputEvent) => {
+    message.value = (e.target as HTMLInputElement).value
+}
 const speak = () => {
-    console.log(message.value) // TODO
-    message.value = ''
+    message.value = message.value.trim()
+    if (!message.value) return
+    sendCmd({ tag: "Speak", message: message.value })
+}
+const toggleDrift = () => {
+    drift.value = drift.value === 1 ? -1 : drift.value === -1 ? 0 : 1
+    sendCmd({ tag: "SetDrift", drift: drift.value })
 }
 </script>
 <template>
@@ -21,13 +34,13 @@ const speak = () => {
         <div class="size-96 border-2 object-center">게임판</div>
         <div>
             <div class="flex flex-row">
-                <button type="button">
+                <button type="button" class="grow text-xs break-keep" @click="toggleDrift">
                     <div>
-                        <p class="text-xs break-keep">
+                        <p>
                             명중률이 대체로 <strong :class="driftColor">{{ driftText }}</strong>
                             <span v-if="drift === 0">됩</span><span v-else>합</span>니다.
                         </p>
-                        <p class="text-xs break-keep">누르면 경향세가 바뀝니다.</p>
+                        <p>누르면 경향세가 바뀝니다.</p>
                     </div>
                 </button>
                 <button type="button" disabled class="grow text-xs break-keep disabled:opacity-75 disabled:cursor-not-allowed">
@@ -36,7 +49,7 @@ const speak = () => {
                 </button>
             </div>
             <div class="flex">
-                <input type="text" class="grow p-1 rounded-md" placeholder="여기에 할 말 입력..." :value="message" maxlength="80" @input="e => message = (e.target as HTMLInputElement).value" @keydown="onMessageInputEnter" />
+                <input type="text" class="grow p-1 rounded-md" placeholder="여기에 할 말 입력..." :value="message" maxlength="80" @input="onMessageInput" @keydown="onMessageInputEnter" />
                 <button type="button" class="p-1 rounded-md" @click="speak">전송</button>
             </div>
         </div>
